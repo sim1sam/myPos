@@ -20,10 +20,16 @@ Route::middleware('auth')->group(function () {
     Route::get('purchases/create', [PurchaseController::class, 'create'])->name('pos.purchases.create');
     Route::post('purchases', [PurchaseController::class, 'store'])->name('pos.purchases.store');
     Route::get('purchases/list', [PurchaseController::class, 'index'])->name('pos.purchases.index');
+    Route::get('purchases/{purchase}/edit', [PurchaseController::class, 'edit'])->name('pos.purchases.edit');
+    Route::put('purchases/{purchase}', [PurchaseController::class, 'update'])->name('pos.purchases.update');
+    Route::delete('purchases/{purchase}', [PurchaseController::class, 'destroy'])->name('pos.purchases.destroy');
     Route::get('vendors', [VendorController::class, 'dashboard'])->name('pos.vendors');
     Route::get('vendors/create', [VendorController::class, 'create'])->name('pos.vendors.create');
     Route::post('vendors', [VendorController::class, 'store'])->name('pos.vendors.store');
     Route::get('vendors/list', [VendorController::class, 'index'])->name('pos.vendors.index');
+    Route::get('vendors/{vendor}/edit', [VendorController::class, 'edit'])->name('pos.vendors.edit');
+    Route::put('vendors/{vendor}', [VendorController::class, 'update'])->name('pos.vendors.update');
+    Route::delete('vendors/{vendor}', [VendorController::class, 'destroy'])->name('pos.vendors.destroy');
     Route::view('products', 'pos.page', ['title' => 'Products'])->name('pos.products');
     Route::view('customers', 'pos.customers')->name('pos.customers');
     Route::get('customers/create', [CustomerController::class, 'create'])->name('pos.customers.create');

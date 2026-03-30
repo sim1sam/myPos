@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Vendor;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class VendorController extends Controller
@@ -67,6 +68,51 @@ class VendorController extends Controller
             ->withQueryString();
 
         return view('pos.vendors-index', compact('vendors'));
+    }
+
+    public function edit(Vendor $vendor): View
+    {
+        return view('pos.vendors-edit', compact('vendor'));
+    }
+
+    public function update(Request $request, Vendor $vendor): RedirectResponse
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'gstin' => ['nullable', 'string', 'max:30'],
+            'mobile_no' => ['nullable', 'string', 'max:30'],
+            'account_name' => ['nullable', 'string', 'max:255'],
+            'account_no' => ['nullable', 'string', 'max:50'],
+            'ifsc' => ['nullable', 'string', 'max:30'],
+            'bank_name' => ['nullable', 'string', 'max:255'],
+            'branch_name' => ['nullable', 'string', 'max:255'],
+            'document' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png,webp', 'max:5120'],
+            'gpay_phonepay_no' => ['nullable', 'string', 'max:30'],
+        ]);
+
+        if ($request->hasFile('document')) {
+            if ($vendor->document_path && Storage::disk('public')->exists($vendor->document_path)) {
+                Storage::disk('public')->delete($vendor->document_path);
+            }
+            $data['document_path'] = $request->file('document')->store('vendors/documents', 'public');
+        }
+
+        unset($data['document']);
+
+        $vendor->update($data);
+
+        return redirect()->route('pos.vendors.index')->with('success', 'Vendor updated successfully.');
+    }
+
+    public function destroy(Vendor $vendor): RedirectResponse
+    {
+        if ($vendor->document_path && Storage::disk('public')->exists($vendor->document_path)) {
+            Storage::disk('public')->delete($vendor->document_path);
+        }
+
+        $vendor->delete();
+
+        return redirect()->route('pos.vendors.index')->with('success', 'Vendor deleted successfully.');
     }
 
     private function generateVendorCode(string $name): string

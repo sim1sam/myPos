@@ -23,6 +23,11 @@
                 <a href="{{ route('pos.vendors.create') }}" class="pos-btn-primary w-auto! px-5 py-2.5">Create Vendor</a>
             </div>
         </div>
+        @if (session('success'))
+            <div class="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                {{ session('success') }}
+            </div>
+        @endif
 
         <div class="mt-6 pos-dashboard-card p-0">
             <div class="overflow-x-auto">
@@ -40,6 +45,7 @@
                             <th class="px-4 py-3 font-semibold">Branch</th>
                             <th class="px-4 py-3 font-semibold">GPay/PhonePe</th>
                             <th class="px-4 py-3 font-semibold">Document</th>
+                            <th class="px-4 py-3 font-semibold">Action</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200">
@@ -62,10 +68,24 @@
                                         -
                                     @endif
                                 </td>
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center gap-2">
+                                        <a href="{{ route('pos.vendors.edit', $vendor) }}" class="rounded-md bg-sky-50 px-2.5 py-1 text-xs font-medium text-sky-700 ring-1 ring-sky-100 hover:bg-sky-100">
+                                            Edit
+                                        </a>
+                                        <form method="POST" action="{{ route('pos.vendors.destroy', $vendor) }}" onsubmit="return confirm('Delete this vendor?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="rounded-md bg-rose-50 px-2.5 py-1 text-xs font-medium text-rose-700 ring-1 ring-rose-100 hover:bg-rose-100">
+                                                Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="11" class="px-4 py-8 text-center text-slate-500">No vendors found.</td>
+                                <td colspan="12" class="px-4 py-8 text-center text-slate-500">No vendors found.</td>
                             </tr>
                         @endforelse
                     </tbody>
