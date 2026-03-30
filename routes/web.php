@@ -3,6 +3,7 @@
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
@@ -48,7 +49,7 @@ Route::middleware('auth')->group(function () {
     Route::put('customers/{customer}', [CustomerController::class, 'update'])->name('pos.customers.update');
     Route::delete('customers/{customer}', [CustomerController::class, 'destroy'])->name('pos.customers.destroy');
     Route::view('inventory', 'pos.page', ['title' => 'Inventory'])->name('pos.inventory');
-    Route::view('reports', 'pos.page', ['title' => 'Reports'])->name('pos.reports');
+    Route::get('reports', [ReportController::class, 'index'])->name('pos.reports');
     Route::view('settings', 'pos.page', ['title' => 'Settings'])->name('pos.settings');
     Route::post('logout', [LoginController::class, 'destroy'])->name('logout');
 });
