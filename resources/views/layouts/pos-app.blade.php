@@ -50,6 +50,18 @@
             </header>
 
             <main class="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6 lg:px-8">
+                <div class="mb-5">
+                    <button
+                        type="button"
+                        onclick="if(window.history.length > 1){ window.history.back(); } else { window.location.href='{{ route('dashboard') }}'; }"
+                        class="inline-flex items-center gap-2 rounded-md bg-sky-50 px-3 py-2 text-sm font-medium text-sky-700 ring-1 ring-sky-100 transition hover:bg-sky-100"
+                    >
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                        </svg>
+                        Back
+                    </button>
+                </div>
                 @yield('page-content')
             </main>
 
