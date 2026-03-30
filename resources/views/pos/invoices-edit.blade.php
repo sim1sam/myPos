@@ -1,30 +1,31 @@
 @extends('layouts.pos-app')
 
-@section('title', 'Create Invoice — ' . config('app.name'))
+@section('title', 'Edit Invoice — ' . config('app.name'))
 
 @section('page-content')
     <section class="mx-auto max-w-screen-2xl">
-        <div class="pos-dashboard-card">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-                <h1 class="text-2xl font-semibold text-slate-800">Create Invoice</h1>
-                <a href="{{ route('pos.customers.create', ['redirect_to' => 'pos.invoices.create']) }}" class="pos-btn-primary w-auto! px-5 py-2.5">+ Add Customer</a>
-            </div>
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <h1 class="text-2xl font-semibold text-slate-800">Edit Invoice {{ $invoice->invoice_no }}</h1>
+            <a href="{{ route('pos.invoices.index') }}" class="pos-btn-ghost">Back</a>
+        </div>
 
-            <form method="POST" action="{{ route('pos.invoices.store') }}" class="mt-6 space-y-5" id="invoice-form">
+        <div class="pos-dashboard-card">
+            <form method="POST" action="{{ route('pos.invoices.update', $invoice) }}" class="mt-6 space-y-5" id="invoice-edit-form">
                 @csrf
+                @method('PUT')
                 <input type="hidden" name="items_json" id="items_json">
-                <input type="hidden" name="subtotal" id="subtotal_input" value="0">
-                <input type="hidden" name="sgst" id="sgst_input" value="0">
-                <input type="hidden" name="cgst" id="cgst_input" value="0">
-                <input type="hidden" name="igst" id="igst_input" value="0">
-                <input type="hidden" name="total_amount" id="total_amount_input" value="0">
+                <input type="hidden" name="subtotal" id="subtotal_input" value="{{ number_format((float) $invoice->subtotal, 2, '.', '') }}">
+                <input type="hidden" name="sgst" id="sgst_input" value="{{ number_format((float) $invoice->sgst, 2, '.', '') }}">
+                <input type="hidden" name="cgst" id="cgst_input" value="{{ number_format((float) $invoice->cgst, 2, '.', '') }}">
+                <input type="hidden" name="igst" id="igst_input" value="{{ number_format((float) $invoice->igst, 2, '.', '') }}">
+                <input type="hidden" name="total_amount" id="total_amount_input" value="{{ number_format((float) $invoice->total_amount, 2, '.', '') }}">
                 <div class="grid gap-4 md:grid-cols-3">
                     <div>
                         <label class="pos-label" for="prefix">Prefix</label>
                         <select id="prefix" name="prefix" class="pos-input">
-                            <option value="">(Blank)</option>
-                            <option value="Mr">Mr</option>
-                            <option value="Mrs">Mrs</option>
+                            <option value="" @selected(!$invoice->prefix)>(Blank)</option>
+                            <option value="Mr" @selected($invoice->prefix === 'Mr')>Mr</option>
+                            <option value="Mrs" @selected($invoice->prefix === 'Mrs')>Mrs</option>
                         </select>
                     </div>
                     <div>
@@ -32,25 +33,35 @@
                         <select id="customer_id" name="customer_id" class="pos-input">
                             <option value="">-- Select Customer --</option>
                             @foreach ($customers as $customer)
-                                <option value="{{ $customer->id }}">{{ $customer->customer_code }} - {{ $customer->name }}</option>
+                                <option value="{{ $customer->id }}" @selected((int) $invoice->customer_id === $customer->id)>
+                                    {{ $customer->customer_code }} - {{ $customer->name }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
                     <div>
                         <label class="pos-label" for="gst_type">GST Type</label>
                         <select id="gst_type" name="gst_type" class="pos-input">
-                            <option value="same">Same State</option>
-                            <option value="other">Other State</option>
-                            <option value="none">No GST</option>
+                            <option value="same" @selected($invoice->gst_type === 'same')>Same State</option>
+                            <option value="other" @selected($invoice->gst_type === 'other')>Other State</option>
+                            <option value="none" @selected($invoice->gst_type === 'none')>No GST</option>
                         </select>
                     </div>
                     <div>
                         <label class="pos-label" for="invoice_date">Invoice Date</label>
-                        <input id="invoice_date" name="invoice_date" type="date" class="pos-input" value="{{ now()->format('Y-m-d') }}">
+                        <input id="invoice_date" name="invoice_date" type="date" class="pos-input" value="{{ optional($invoice->invoice_date)->format('Y-m-d') }}">
                     </div>
                     <div>
                         <label class="pos-label" for="due_date">Due Date</label>
-                        <input id="due_date" name="due_date" type="date" class="pos-input" value="{{ now()->addDays(7)->format('Y-m-d') }}">
+                        <input id="due_date" name="due_date" type="date" class="pos-input" value="{{ optional($invoice->due_date)->format('Y-m-d') }}">
+                    </div>
+                    <div>
+                        <label class="pos-label" for="status">Status</label>
+                        <select id="status" name="status" class="pos-input">
+                            <option value="unpaid" @selected($invoice->status === 'unpaid')>Unpaid</option>
+                            <option value="paid" @selected($invoice->status === 'paid')>Paid</option>
+                            <option value="cancelled" @selected($invoice->status === 'cancelled')>Cancelled</option>
+                        </select>
                     </div>
                 </div>
 
@@ -101,16 +112,30 @@
                 </div>
 
                 <div class="flex items-center justify-end gap-3 pt-2">
-                    <a href="{{ route('pos.invoices.index') }}" class="pos-btn-ghost">Invoice List</a>
-                    <button type="submit" class="pos-btn-primary w-auto! px-6">Submit Invoice</button>
+                    <a href="{{ route('pos.invoices.show', $invoice) }}" class="pos-btn-ghost">View Invoice</a>
+                    <button type="submit" class="pos-btn-primary w-auto! px-6">Update Invoice</button>
                 </div>
             </form>
         </div>
     </section>
 
+    @php
+        $existingItems = $invoice->items->map(function ($item) {
+            return [
+                'description' => $item->description,
+                'hsn_sac' => $item->hsn_sac,
+                'rate' => (float) $item->rate,
+                'qty' => (int) $item->qty,
+                'unit' => $item->unit,
+                'discount' => (float) $item->discount,
+                'amount' => (float) $item->amount,
+            ];
+        })->values();
+    @endphp
     <script>
         (() => {
             const products = @json($products);
+            const existingItems = @json($existingItems);
             const hsnOptions = [...new Set(products.map((p) => p.hsn_sac))].sort();
             const tbody = document.getElementById('invoice-items-body');
             const addRowBtn = document.getElementById('add-row-btn');
@@ -121,7 +146,7 @@
             const cgstEl = document.getElementById('cgst');
             const igstEl = document.getElementById('igst');
             const totalAmountEl = document.getElementById('total-amount');
-            const formEl = document.getElementById('invoice-form');
+            const formEl = document.getElementById('invoice-edit-form');
             const itemsJsonEl = document.getElementById('items_json');
             const subtotalInput = document.getElementById('subtotal_input');
             const sgstInput = document.getElementById('sgst_input');
@@ -143,7 +168,7 @@
                 if (gstTypeEl.value === 'same') {
                     sgst = subtotal * 0.09;
                     cgst = subtotal * 0.09;
-                } else {
+                } else if (gstTypeEl.value === 'other') {
                     igst = subtotal * 0.18;
                 }
                 const total = subtotal + sgst + cgst + igst;
@@ -166,7 +191,6 @@
                     <td class="px-3 py-2 min-w-80">
                         <select class="pos-input item-description" multiple size="4"></select>
                         <p class="mt-1 text-xs text-slate-500">Use Ctrl/Cmd to select multiple products.</p>
-                        <button type="button" class="mt-2 pos-btn-ghost split-products text-xs">Add Selected as Rows</button>
                     </td>
                     <td class="px-3 py-2 min-w-56">
                         <select class="pos-input item-hsn">
@@ -175,7 +199,7 @@
                         </select>
                     </td>
                     <td class="px-3 py-2"><input type="number" min="1" step="0.01" class="pos-input item-rate" value="1"></td>
-                    <td class="px-3 py-2"><input type="number" min="0" step="1" class="pos-input item-qty" value="1"></td>
+                    <td class="px-3 py-2"><input type="number" min="1" step="1" class="pos-input item-qty" value="1"></td>
                     <td class="px-3 py-2"><input type="text" class="pos-input item-unit" value=""></td>
                     <td class="px-3 py-2"><input type="number" min="0" step="0.01" class="pos-input item-discount" value="0"></td>
                     <td class="px-3 py-2"><input type="number" readonly class="pos-input item-amount bg-slate-50" value="0"></td>
@@ -188,10 +212,8 @@
                 const descEl = row.querySelector('.item-description');
                 const rateEl = row.querySelector('.item-rate');
                 const qtyEl = row.querySelector('.item-qty');
-                const unitEl = row.querySelector('.item-unit');
                 const discountEl = row.querySelector('.item-discount');
                 const amountEl = row.querySelector('.item-amount');
-                const splitBtn = row.querySelector('.split-products');
 
                 const calcAmount = () => {
                     const rate = Number(rateEl.value || 0);
@@ -203,67 +225,29 @@
                 };
 
                 const populateDescriptions = () => {
-                const filtered = products
+                    const filtered = products
                         .filter((p) => p.hsn_sac === hsnEl.value)
                         .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
 
                     descEl.innerHTML = filtered.length
-                        ? filtered.map((p) => `<option value="${p.id}" data-rate="${p.rate}" data-unit="${p.unit || ''}">${p.name}</option>`).join('')
+                        ? filtered.map((p) => `<option value="${p.id}">${p.name}</option>`).join('')
                         : `<option value="" disabled>No products available for selected HSN/SAC</option>`;
-
-                    // Keep flow simple: if products exist, preselect first one.
-                    if (filtered.length > 0 && descEl.options.length > 0) {
-                        descEl.options[0].selected = true;
-                    }
-                    calcAmount();
                 };
 
-                const onDescriptionChange = () => {
-                    // Sales rate is manual; do not auto-fill from purchase data.
+                hsnEl.addEventListener('change', () => {
+                    populateDescriptions();
                     calcAmount();
-                };
-
-                const splitSelectedProducts = () => {
-                    const selected = [...descEl.selectedOptions].filter((opt) => opt.value);
-                    if (selected.length <= 1) return;
-
-                    // Keep first selection in current row, create new rows for remaining selections.
-                    [...descEl.options].forEach((opt) => { opt.selected = false; });
-                    const first = selected[0];
-                    const firstMatch = [...descEl.options].find((opt) => opt.value === first.value);
-                    if (firstMatch) firstMatch.selected = true;
-
-                    selected.slice(1).forEach((opt) => {
-                        const newRow = addRow();
-                        const helpers = newRow._helpers;
-                        helpers.hsnEl.value = hsnEl.value;
-                        helpers.populateDescriptions();
-                        const match = [...helpers.descEl.options].find((o) => o.value === opt.value);
-                        if (match) match.selected = true;
-                        helpers.calcAmount();
-                    });
-
-                    calcAmount();
-                };
-
-                hsnEl.addEventListener('change', populateDescriptions);
-                descEl.addEventListener('change', onDescriptionChange);
+                });
                 rateEl.addEventListener('input', calcAmount);
                 qtyEl.addEventListener('input', calcAmount);
                 discountEl.addEventListener('input', calcAmount);
-                splitBtn.addEventListener('click', splitSelectedProducts);
                 row.querySelector('.remove-row').addEventListener('click', () => {
                     row.remove();
                     refreshSerials();
                     renderTotals();
                 });
 
-                row._helpers = {
-                    hsnEl,
-                    descEl,
-                    calcAmount,
-                    populateDescriptions,
-                };
+                row._helpers = { hsnEl, descEl, rateEl, qtyEl, discountEl, amountEl, calcAmount, populateDescriptions };
             };
 
             const refreshSerials = () => {
@@ -272,16 +256,36 @@
                 });
             };
 
-            const addRow = () => {
+            const addRow = (item = null) => {
                 tbody.insertAdjacentHTML('beforeend', rowTemplate(tbody.querySelectorAll('tr').length + 1));
                 const row = tbody.lastElementChild;
                 bindRowEvents(row);
+
+                const { hsnEl, descEl, rateEl, qtyEl, discountEl, amountEl, populateDescriptions } = row._helpers;
+                if (item) {
+                    hsnEl.value = item.hsn_sac || '';
+                    populateDescriptions();
+                    const match = [...descEl.options].find((opt) => opt.textContent.trim() === (item.description || '').trim());
+                    if (match) {
+                        match.selected = true;
+                    } else if (item.description) {
+                        descEl.innerHTML += `<option value="" selected>${item.description}</option>`;
+                    }
+                    rateEl.value = item.rate ?? 1;
+                    qtyEl.value = item.qty ?? 1;
+                    row.querySelector('.item-unit').value = item.unit || '';
+                    discountEl.value = item.discount ?? 0;
+                    amountEl.value = formatMoney(item.amount ?? 0);
+                } else {
+                    populateDescriptions();
+                }
+
                 renderTotals();
                 return row;
             };
 
             gstTypeEl.addEventListener('change', renderTotals);
-            addRowBtn.addEventListener('click', addRow);
+            addRowBtn.addEventListener('click', () => addRow());
             formEl.addEventListener('submit', (e) => {
                 const items = [...tbody.querySelectorAll('tr')].map((row) => {
                     const selected = row.querySelector('.item-description').selectedOptions[0];
@@ -303,7 +307,13 @@
                 }
                 itemsJsonEl.value = JSON.stringify(items);
             });
-            addRow();
+
+            if (existingItems.length) {
+                existingItems.forEach((item) => addRow(item));
+            } else {
+                addRow();
+            }
+            renderTotals();
         })();
     </script>
 @endsection

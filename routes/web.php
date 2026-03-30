@@ -35,6 +35,11 @@ Route::middleware('auth')->group(function () {
     Route::get('invoices/create', [InvoiceController::class, 'create'])->name('pos.invoices.create');
     Route::post('invoices', [InvoiceController::class, 'store'])->name('pos.invoices.store');
     Route::get('invoices/list', [InvoiceController::class, 'index'])->name('pos.invoices.index');
+    Route::get('invoices/{invoice}', [InvoiceController::class, 'show'])->name('pos.invoices.show');
+    Route::get('invoices/{invoice}/edit', [InvoiceController::class, 'edit'])->name('pos.invoices.edit');
+    Route::put('invoices/{invoice}', [InvoiceController::class, 'update'])->name('pos.invoices.update');
+    Route::delete('invoices/{invoice}', [InvoiceController::class, 'destroy'])->name('pos.invoices.destroy');
+    Route::post('invoices/{invoice}/convert-gst', [InvoiceController::class, 'convertGst'])->name('pos.invoices.convert-gst');
     Route::view('customers', 'pos.customers')->name('pos.customers');
     Route::get('customers/create', [CustomerController::class, 'create'])->name('pos.customers.create');
     Route::post('customers', [CustomerController::class, 'store'])->name('pos.customers.store');
