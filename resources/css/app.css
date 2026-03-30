@@ -74,8 +74,12 @@
             radial-gradient(circle at 100% 100%, rgba(37, 99, 235, 0.06), transparent 40%);
     }
 
-    .pos-chip {
-        @apply inline-flex rounded-md bg-sky-50 px-2 py-1 text-xs font-semibold tracking-wide text-sky-700 ring-1 ring-sky-100;
+    .pos-card-icon {
+        @apply mb-3 inline-flex h-8 w-8 items-center justify-center text-slate-700;
+    }
+
+    .pos-card-icon-gold {
+        @apply text-amber-500;
     }
 
     .pos-dashboard-card::before {
