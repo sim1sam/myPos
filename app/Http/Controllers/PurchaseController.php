@@ -40,7 +40,7 @@ class PurchaseController extends Controller
 
         Purchase::create($data);
 
-        return redirect()->route('pos.purchases')->with('success', 'Purchase created successfully.');
+        return redirect()->route('pos.purchases.create')->with('success', 'Purchase created successfully.');
     }
 
     public function index(): View

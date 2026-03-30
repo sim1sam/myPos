@@ -5,7 +5,15 @@
 @section('page-content')
     <section class="mx-auto max-w-5xl">
         <div class="pos-dashboard-card">
-            <h1 class="text-2xl font-semibold text-slate-800">Create Purchase</h1>
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <h1 class="text-2xl font-semibold text-slate-800">Create Purchase</h1>
+                <a href="{{ route('pos.vendors.create', ['redirect_to' => 'pos.purchases.create']) }}" class="pos-btn-primary w-auto! px-5 py-2.5">Add Vendor</a>
+            </div>
+            @if (session('success'))
+                <div class="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                    {{ session('success') }}
+                </div>
+            @endif
 
             <form method="POST" action="{{ route('pos.purchases.store') }}" class="mt-6 grid gap-5 md:grid-cols-2">
                 @csrf
@@ -79,6 +87,7 @@
                 </div>
 
                 <div class="md:col-span-2 flex items-center justify-end gap-3">
+                    <a href="{{ route('pos.purchases.index') }}" class="pos-btn-ghost">List Purchases</a>
                     <a href="{{ route('pos.purchases') }}" class="pos-btn-ghost">Cancel</a>
                     <button type="submit" class="pos-btn-primary w-auto! px-6">Save Purchase</button>
                 </div>

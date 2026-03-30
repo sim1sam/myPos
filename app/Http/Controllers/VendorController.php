@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Vendor;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
@@ -44,6 +45,12 @@ class VendorController extends Controller
         unset($data['document']);
 
         Vendor::create($data);
+
+        $redirectTo = (string) $request->input('redirect_to', '');
+
+        if ($redirectTo !== '' && Route::has($redirectTo)) {
+            return redirect()->route($redirectTo)->with('success', 'Vendor created successfully.');
+        }
 
         return redirect()->route('pos.vendors')->with('success', 'Vendor created successfully.');
     }

@@ -9,6 +9,7 @@
 
             <form method="POST" action="{{ route('pos.vendors.store') }}" enctype="multipart/form-data" class="mt-6 grid gap-5 md:grid-cols-2">
                 @csrf
+                <input type="hidden" name="redirect_to" value="{{ request('redirect_to') }}">
 
                 <div>
                     <label for="name" class="pos-label">Name *</label>
@@ -71,7 +72,7 @@
                 </div>
 
                 <div class="md:col-span-2 flex items-center justify-end gap-3">
-                    <a href="{{ route('pos.vendors') }}" class="pos-btn-ghost">Cancel</a>
+                    <a href="{{ request('redirect_to') && \Illuminate\Support\Facades\Route::has(request('redirect_to')) ? route(request('redirect_to')) : route('pos.vendors') }}" class="pos-btn-ghost">Cancel</a>
                     <button type="submit" class="pos-btn-primary w-auto! px-6">Save Vendor</button>
                 </div>
             </form>
