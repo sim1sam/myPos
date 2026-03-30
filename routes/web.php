@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\VendorController;
 use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +16,14 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
     Route::view('sales', 'pos.page', ['title' => 'Sales / Billing'])->name('pos.sales');
+    Route::get('purchases', [PurchaseController::class, 'dashboard'])->name('pos.purchases');
+    Route::get('purchases/create', [PurchaseController::class, 'create'])->name('pos.purchases.create');
+    Route::post('purchases', [PurchaseController::class, 'store'])->name('pos.purchases.store');
+    Route::get('purchases/list', [PurchaseController::class, 'index'])->name('pos.purchases.index');
+    Route::get('vendors', [VendorController::class, 'dashboard'])->name('pos.vendors');
+    Route::get('vendors/create', [VendorController::class, 'create'])->name('pos.vendors.create');
+    Route::post('vendors', [VendorController::class, 'store'])->name('pos.vendors.store');
+    Route::get('vendors/list', [VendorController::class, 'index'])->name('pos.vendors.index');
     Route::view('products', 'pos.page', ['title' => 'Products'])->name('pos.products');
     Route::view('customers', 'pos.customers')->name('pos.customers');
     Route::get('customers/create', [CustomerController::class, 'create'])->name('pos.customers.create');

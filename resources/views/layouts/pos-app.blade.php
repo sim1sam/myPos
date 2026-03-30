@@ -14,6 +14,8 @@
             $menu = [
                 ['label' => 'Home', 'route' => 'dashboard'],
                 ['label' => 'POS', 'route' => 'pos.sales'],
+                ['label' => 'Purchase', 'route' => 'pos.purchases'],
+                ['label' => 'Vendor', 'route' => 'pos.vendors'],
                 ['label' => 'Invoices', 'route' => 'pos.products'],
                 ['label' => 'Customers', 'route' => 'pos.customers'],
                 ['label' => 'Add Payment', 'route' => 'pos.inventory'],
@@ -59,6 +61,10 @@
                                         <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75A2.25 2.25 0 0 1 6 4.5h12A2.25 2.25 0 0 1 20.25 6.75v10.5A2.25 2.25 0 0 1 18 19.5H6a2.25 2.25 0 0 1-2.25-2.25V6.75Z" /></svg>
                                     @elseif ($item['route'] === 'pos.products')
                                         <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75A2.25 2.25 0 0 1 6 4.5h4.784c.597 0 1.169.237 1.591.659l1.216 1.216c.422.422.994.659 1.591.659H18a2.25 2.25 0 0 1 2.25 2.25v7.966A2.25 2.25 0 0 1 18 19.5H6a2.25 2.25 0 0 1-2.25-2.25V6.75Z" /></svg>
+                                    @elseif ($item['route'] === 'pos.vendors')
+                                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 6h15m-13.5 4.5h12m-12 4.5h12m-12 4.5h9" /></svg>
+                                    @elseif ($item['route'] === 'pos.purchases')
+                                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.5h16.5v15H3.75v-15Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 9.75h9M7.5 13.5h9" /></svg>
                                     @elseif ($item['route'] === 'pos.customers')
                                         <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 8.25a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5a7.5 7.5 0 0 1 15 0" /></svg>
                                     @elseif ($item['route'] === 'pos.inventory')
@@ -93,6 +99,10 @@
                                     <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75A2.25 2.25 0 0 1 6 4.5h12A2.25 2.25 0 0 1 20.25 6.75v10.5A2.25 2.25 0 0 1 18 19.5H6a2.25 2.25 0 0 1-2.25-2.25V6.75Z" /></svg>
                                 @elseif ($item['route'] === 'pos.products')
                                     <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75A2.25 2.25 0 0 1 6 4.5h4.784c.597 0 1.169.237 1.591.659l1.216 1.216c.422.422.994.659 1.591.659H18a2.25 2.25 0 0 1 2.25 2.25v7.966A2.25 2.25 0 0 1 18 19.5H6a2.25 2.25 0 0 1-2.25-2.25V6.75Z" /></svg>
+                                @elseif ($item['route'] === 'pos.vendors')
+                                    <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 6h15m-13.5 4.5h12m-12 4.5h12m-12 4.5h9" /></svg>
+                                @elseif ($item['route'] === 'pos.purchases')
+                                    <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.5h16.5v15H3.75v-15Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 9.75h9M7.5 13.5h9" /></svg>
                                 @elseif ($item['route'] === 'pos.customers')
                                     <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 8.25a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5a7.5 7.5 0 0 1 15 0" /></svg>
                                 @elseif ($item['route'] === 'pos.inventory')

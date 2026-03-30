@@ -14,6 +14,16 @@
             <h2 class="mt-2 text-lg font-semibold text-slate-800">Invoices</h2>
             <p class="mt-1 text-sm text-slate-500">View all invoices</p>
         </a>
+        <a href="{{ route('pos.purchases') }}" class="pos-dashboard-card group">
+            <span class="pos-card-icon"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.5h16.5v15H3.75v-15Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 9.75h9M7.5 13.5h9"/></svg></span>
+            <h2 class="mt-2 text-lg font-semibold text-slate-800">Purchase</h2>
+            <p class="mt-1 text-sm text-slate-500">Create and manage purchases</p>
+        </a>
+        <a href="{{ route('pos.vendors') }}" class="pos-dashboard-card group">
+            <span class="pos-card-icon pos-card-icon-gold"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 6h15m-13.5 4.5h12m-12 4.5h12m-12 4.5h9"/></svg></span>
+            <h2 class="mt-2 text-lg font-semibold text-slate-800">Vendor</h2>
+            <p class="mt-1 text-sm text-slate-500">Create and manage vendors</p>
+        </a>
         <a href="{{ route('pos.customers') }}" class="pos-dashboard-card group">
             <span class="pos-card-icon"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 8.25a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5a7.5 7.5 0 0 1 15 0"/></svg></span>
             <h2 class="mt-2 text-lg font-semibold text-slate-800">Customers</h2>
