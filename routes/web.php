@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\Auth\LoginController;
@@ -15,7 +16,7 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
-    Route::view('sales', 'pos.page', ['title' => 'Sales / Billing'])->name('pos.sales');
+    Route::get('sales', [InvoiceController::class, 'create'])->name('pos.sales');
     Route::get('purchases', [PurchaseController::class, 'dashboard'])->name('pos.purchases');
     Route::get('purchases/create', [PurchaseController::class, 'create'])->name('pos.purchases.create');
     Route::post('purchases', [PurchaseController::class, 'store'])->name('pos.purchases.store');
@@ -30,7 +31,10 @@ Route::middleware('auth')->group(function () {
     Route::get('vendors/{vendor}/edit', [VendorController::class, 'edit'])->name('pos.vendors.edit');
     Route::put('vendors/{vendor}', [VendorController::class, 'update'])->name('pos.vendors.update');
     Route::delete('vendors/{vendor}', [VendorController::class, 'destroy'])->name('pos.vendors.destroy');
-    Route::view('products', 'pos.page', ['title' => 'Products'])->name('pos.products');
+    Route::get('products', [InvoiceController::class, 'dashboard'])->name('pos.products');
+    Route::get('invoices/create', [InvoiceController::class, 'create'])->name('pos.invoices.create');
+    Route::post('invoices', [InvoiceController::class, 'store'])->name('pos.invoices.store');
+    Route::get('invoices/list', [InvoiceController::class, 'index'])->name('pos.invoices.index');
     Route::view('customers', 'pos.customers')->name('pos.customers');
     Route::get('customers/create', [CustomerController::class, 'create'])->name('pos.customers.create');
     Route::post('customers', [CustomerController::class, 'store'])->name('pos.customers.store');
