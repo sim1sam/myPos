@@ -36,7 +36,22 @@ class CustomerController extends Controller
 
     public function index(): View
     {
-        $customers = Customer::latest()->paginate(10);
+        $search = request('search');
+
+        $customers = Customer::query()
+            ->when($search, function ($query, $search) {
+                $query->where(function ($subQuery) use ($search) {
+                    $subQuery
+                        ->where('customer_code', 'like', '%' . $search . '%')
+                        ->orWhere('name', 'like', '%' . $search . '%')
+                        ->orWhere('city', 'like', '%' . $search . '%')
+                        ->orWhere('email', 'like', '%' . $search . '%')
+                        ->orWhere('mobile', 'like', '%' . $search . '%');
+                });
+            })
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
 
         return view('pos.customers-index', compact('customers'));
     }

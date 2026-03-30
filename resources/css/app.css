@@ -89,4 +89,41 @@
     .pos-dashboard-card::after {
         content: none;
     }
+
+    .pos-pagination nav {
+        display: flex;
+        justify-content: center;
+    }
+
+    .pos-pagination nav > div:first-child {
+        display: none;
+    }
+
+    .pos-pagination nav a,
+    .pos-pagination nav span {
+        border-radius: 0.5rem;
+        border: 1px solid #bfdbfe;
+        background: #eff6ff;
+        color: #1d4ed8;
+        margin: 0 0.2rem;
+        min-width: 2rem;
+        height: 2rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        font-weight: 600;
+        line-height: 1;
+    }
+
+    .pos-pagination nav a:hover {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .pos-pagination nav span[aria-current='page'] {
+        background: linear-gradient(90deg, #0284c7, #2563eb);
+        border-color: #2563eb;
+        color: #ffffff;
+    }
 }

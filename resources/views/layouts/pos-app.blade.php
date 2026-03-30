@@ -23,7 +23,7 @@
 
         <div class="flex min-h-screen flex-col">
             <header class="pos-topbar">
-                <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+                <div class="mx-auto flex max-w-screen-2xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
                     <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2 text-sky-800">
                         <span class="flex h-8 w-8 items-center justify-center rounded-full bg-linear-to-br from-sky-600 to-blue-700 text-[10px] font-bold text-white">WD</span>
                         <span class="text-sm font-semibold tracking-wide text-sky-900">{{ strtoupper(config('app.name')) }}</span>
@@ -49,7 +49,7 @@
                 </div>
             </header>
 
-            <main class="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6 lg:px-8">
+            <main class="mx-auto w-full max-w-screen-2xl flex-1 px-4 py-10 sm:px-6 lg:px-8">
                 <div class="mb-5">
                     <button
                         type="button"
@@ -66,7 +66,7 @@
             </main>
 
             <footer class="mt-auto border-t border-sky-100 bg-white/80 backdrop-blur-sm">
-                <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 text-xs text-slate-500 sm:px-6 lg:px-8">
+                <div class="mx-auto flex max-w-screen-2xl flex-wrap items-center justify-between gap-3 px-4 py-3 text-xs text-slate-500 sm:px-6 lg:px-8">
                     <p>&copy; {{ date('Y') }} {{ config('app.name') }}</p>
                     <p>Designed for POS workflow</p>
                 </div>

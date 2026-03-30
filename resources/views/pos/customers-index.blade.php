@@ -4,7 +4,25 @@
 
 @section('page-content')
     <section>
-        <h1 class="text-3xl font-semibold tracking-tight text-slate-800">All Customers</h1>
+        <div class="flex flex-wrap items-end justify-between gap-4">
+            <h1 class="text-3xl font-semibold tracking-tight text-slate-800">All Customers</h1>
+            <div class="flex w-full max-w-3xl items-center justify-end gap-2">
+                <form method="GET" action="{{ route('pos.customers.index') }}" class="flex w-full max-w-md items-center gap-2">
+                    <input
+                        type="text"
+                        name="search"
+                        value="{{ request('search') }}"
+                        placeholder="Search by ID, name, city, email, mobile..."
+                        class="pos-input py-2.5"
+                    >
+                    <button type="submit" class="pos-btn-primary w-auto! px-5 py-2.5">Search</button>
+                    @if (request('search'))
+                        <a href="{{ route('pos.customers.index') }}" class="pos-btn-ghost py-2.5">Clear</a>
+                    @endif
+                </form>
+                <a href="{{ route('pos.customers.create') }}" class="pos-btn-primary w-auto! px-5 py-2.5">Create</a>
+            </div>
+        </div>
         @if (session('success'))
             <div class="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
                 {{ session('success') }}
@@ -27,9 +45,9 @@
                             <th class="px-4 py-3 font-semibold">Action</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="divide-y divide-slate-200">
                         @forelse ($customers as $customer)
-                            <tr class="border-t border-slate-100">
+                            <tr>
                                 <td class="px-4 py-3 font-medium text-sky-700">{{ $customer->customer_code ?: '-' }}</td>
                                 <td class="px-4 py-3">{{ $customer->name }}</td>
                                 <td class="px-4 py-3">{{ $customer->address ?: '-' }}</td>
@@ -63,7 +81,7 @@
             </div>
         </div>
 
-        <div class="mt-4">
+        <div class="pos-pagination mt-4">
             {{ $customers->links() }}
         </div>
     </section>
