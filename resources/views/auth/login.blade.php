@@ -146,6 +146,12 @@
                                 </svg>
                             </button>
                         </form>
+
+                        <div class="mt-6 rounded-xl border border-sky-200/70 bg-sky-50 px-4 py-3 text-xs text-sky-900 dark:border-sky-900/50 dark:bg-sky-950/30 dark:text-sky-200">
+                            <p class="font-semibold">Admin test account</p>
+                            <p class="mt-1">Email: <span class="font-mono">admin@mypos.test</span></p>
+                            <p>Password: <span class="font-mono">Admin@12345</span></p>
+                        </div>
                     </section>
 
                     <footer class="mt-10 text-center lg:mt-12">
