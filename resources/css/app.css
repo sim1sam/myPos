@@ -36,7 +36,7 @@
     }
 
     .pos-btn-primary {
-        @apply inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-blue-700 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-900/35;
+        @apply inline-flex w-full items-center justify-center gap-2 rounded-xl bg-linear-to-r from-sky-600 to-blue-700 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-900/35;
         @apply transition hover:from-sky-500 hover:to-blue-600 hover:shadow-blue-800/40;
         @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900;
         @apply active:scale-[0.99];
@@ -49,5 +49,40 @@
 
     .pos-stat-card {
         @apply rounded-xl border border-slate-200/80 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/80;
+    }
+
+    .pos-app-bg {
+        @apply bg-linear-to-b from-sky-50 via-slate-50 to-sky-100;
+    }
+
+    .pos-topbar {
+        @apply border-b border-sky-100 bg-white shadow-sm;
+    }
+
+    .pos-top-link {
+        @apply border-b-2 border-transparent px-1 pb-1 text-slate-600 transition hover:border-sky-200 hover:text-sky-700;
+    }
+
+    .pos-top-link-active {
+        @apply border-sky-600 font-semibold text-sky-700;
+    }
+
+    .pos-dashboard-card {
+        @apply relative overflow-hidden rounded-md bg-white p-7 shadow-2xl shadow-slate-300/70 ring-1 ring-slate-100 transition duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-sky-300/80 sm:min-h-52;
+        background-image:
+            radial-gradient(circle at 0% 0%, rgba(14, 165, 233, 0.08), transparent 42%),
+            radial-gradient(circle at 100% 100%, rgba(37, 99, 235, 0.06), transparent 40%);
+    }
+
+    .pos-chip {
+        @apply inline-flex rounded-md bg-sky-50 px-2 py-1 text-xs font-semibold tracking-wide text-sky-700 ring-1 ring-sky-100;
+    }
+
+    .pos-dashboard-card::before {
+        content: none;
+    }
+
+    .pos-dashboard-card::after {
+        content: none;
     }
 }

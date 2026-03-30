@@ -12,5 +12,11 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
+    Route::view('sales', 'pos.page', ['title' => 'Sales / Billing'])->name('pos.sales');
+    Route::view('products', 'pos.page', ['title' => 'Products'])->name('pos.products');
+    Route::view('customers', 'pos.page', ['title' => 'Customers'])->name('pos.customers');
+    Route::view('inventory', 'pos.page', ['title' => 'Inventory'])->name('pos.inventory');
+    Route::view('reports', 'pos.page', ['title' => 'Reports'])->name('pos.reports');
+    Route::view('settings', 'pos.page', ['title' => 'Settings'])->name('pos.settings');
     Route::post('logout', [LoginController::class, 'destroy'])->name('logout');
 });
