@@ -11,6 +11,7 @@
     </head>
     <body class="pos-app-bg min-h-screen font-sans text-slate-800 antialiased">
         @php
+            $companyLogo = \App\Models\CompanyProfile::query()->value('logo_path');
             $menu = [
                 ['label' => 'Home', 'route' => 'dashboard'],
                 ['label' => 'POS', 'route' => 'pos.sales'],
@@ -25,13 +26,16 @@
 
         <div class="flex min-h-screen flex-col">
             <header class="pos-topbar">
-                <div class="mx-auto max-w-screen-2xl px-6 py-4 sm:px-8 lg:px-10">
+                <div class="mx-auto max-w-screen-2xl px-4 py-4 sm:px-6 lg:px-8">
                     <div class="flex items-center justify-between gap-4">
                     <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2 text-sky-800">
-                        <span class="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-linear-to-br from-sky-600 to-blue-700 text-[10px] font-bold text-white">
-                            WD
+                        <span class="flex h-8 w-auto items-center justify-center overflow-hidden rounded-none bg-transparent text-[10px] font-bold text-white">
+                            @if ($companyLogo)
+                                <img src="{{ asset($companyLogo) }}" alt="Company Logo" class="h-8 w-auto object-contain">
+                            @else
+                                WD
+                            @endif
                         </span>
-                        <span class="text-sm font-semibold tracking-wide text-sky-900">{{ strtoupper(config('app.name')) }}</span>
                     </a>
 
                         <button
@@ -47,7 +51,7 @@
                             </svg>
                         </button>
 
-                        <nav class="hidden items-center gap-4 text-xs sm:text-sm md:flex" aria-label="Top menu">
+                        <nav class="hidden items-center gap-3 text-xs sm:text-sm md:flex" aria-label="Top menu">
                         @foreach ($menu as $item)
                             <a
                                 href="{{ route($item['route']) }}"
@@ -129,7 +133,7 @@
                 </div>
             </header>
 
-            <main class="mx-auto w-full max-w-screen-2xl flex-1 px-6 py-10 sm:px-8 lg:px-10">
+            <main class="mx-auto w-full max-w-screen-2xl flex-1 px-4 py-10 sm:px-6 lg:px-8">
                 <div class="mb-5">
                     <button
                         type="button"
@@ -146,7 +150,7 @@
             </main>
 
             <footer class="mt-auto border-t border-sky-100 bg-white/80 backdrop-blur-sm">
-                <div class="mx-auto flex max-w-screen-2xl flex-wrap items-center justify-between gap-3 px-6 py-3 text-xs text-slate-500 sm:px-8 lg:px-10">
+                <div class="mx-auto flex max-w-screen-2xl flex-wrap items-center justify-between gap-3 px-4 py-3 text-xs text-slate-500 sm:px-6 lg:px-8">
                     <p>&copy; {{ date('Y') }} {{ config('app.name') }}</p>
                     <p>Designed for POS workflow</p>
                 </div>
