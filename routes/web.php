@@ -59,7 +59,8 @@ Route::middleware('auth')->group(function () {
     Route::post('payments', [PaymentController::class, 'store'])->name('pos.payments.store');
     Route::get('reports', [ReportController::class, 'index'])->name('pos.reports');
     Route::get('settings', [SettingController::class, 'index'])->name('pos.settings');
-    Route::view('settings/gst-rates', 'pos.page', ['title' => 'GST Rates'])->name('pos.settings.gst-rates');
+    Route::get('settings/gst-rates', [SettingController::class, 'gstRates'])->name('pos.settings.gst-rates');
+    Route::post('settings/gst-rates', [SettingController::class, 'storeGstRate'])->name('pos.settings.gst-rates.store');
     Route::get('settings/payment-modes', [SettingController::class, 'paymentModes'])->name('pos.settings.payment-modes.index');
     Route::get('settings/payment-modes/create', [SettingController::class, 'createPaymentMode'])->name('pos.settings.payment-modes.create');
     Route::post('settings/payment-modes', [SettingController::class, 'storePaymentMode'])->name('pos.settings.payment-modes.store');

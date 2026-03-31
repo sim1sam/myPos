@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\CompanyProfile;
+use App\Models\GstRate;
 use App\Models\PaymentMode;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class SettingController extends Controller
@@ -33,6 +35,76 @@ class SettingController extends Controller
     public function index(): View
     {
         return view('pos.settings');
+    }
+
+    public function gstRates(): View
+    {
+        $rates = GstRate::with('slabs')
+            ->orderBy('hsn_sac')
+            ->paginate(15);
+
+        return view('pos.gst-rates', compact('rates'));
+    }
+
+    public function storeGstRate(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'hsn_sac' => ['required', 'string', 'max:50'],
+            'description' => ['nullable', 'string', 'max:255'],
+            'gst_type' => ['required', 'in:simple,slab'],
+            'simple_rate' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'slabs' => ['nullable', 'array'],
+            'slabs.*.min_amount' => ['nullable', 'numeric', 'min:0'],
+            'slabs.*.max_amount' => ['nullable', 'numeric', 'min:0'],
+            'slabs.*.rate' => ['nullable', 'numeric', 'min:0', 'max:100'],
+        ]);
+
+        if ($data['gst_type'] === 'simple' && (!isset($data['simple_rate']) || $data['simple_rate'] === null || $data['simple_rate'] === '')) {
+            return back()->withErrors(['simple_rate' => 'GST rate is required for Simple type.'])->withInput();
+        }
+
+        if ($data['gst_type'] === 'slab') {
+            $validSlabs = collect($data['slabs'] ?? [])
+                ->filter(fn ($slab) => ($slab['min_amount'] ?? '') !== '' && ($slab['rate'] ?? '') !== '')
+                ->values();
+
+            if ($validSlabs->isEmpty()) {
+                return back()->withErrors(['slabs' => 'At least one slab is required for Slab type.'])->withInput();
+            }
+        }
+
+        DB::transaction(function () use ($data) {
+            $rate = GstRate::updateOrCreate(
+                ['hsn_sac' => $data['hsn_sac']],
+                [
+                    'description' => $data['description'] ?? null,
+                    'gst_type' => $data['gst_type'],
+                    'simple_rate' => $data['gst_type'] === 'simple' ? $data['simple_rate'] : null,
+                ]
+            );
+
+            $rate->slabs()->delete();
+
+            if ($data['gst_type'] === 'slab') {
+                $slabs = collect($data['slabs'] ?? [])
+                    ->filter(fn ($slab) => ($slab['min_amount'] ?? '') !== '' && ($slab['rate'] ?? '') !== '')
+                    ->map(function ($slab) {
+                        return [
+                            'min_amount' => (float) $slab['min_amount'],
+                            'max_amount' => ($slab['max_amount'] ?? '') !== '' ? (float) $slab['max_amount'] : null,
+                            'rate' => (float) $slab['rate'],
+                        ];
+                    })
+                    ->values()
+                    ->all();
+
+                if (!empty($slabs)) {
+                    $rate->slabs()->createMany($slabs);
+                }
+            }
+        });
+
+        return redirect()->route('pos.settings.gst-rates')->with('success', 'GST rate saved successfully.');
     }
 
     public function paymentModes(): View
