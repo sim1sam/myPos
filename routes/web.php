@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PurchaseController;
@@ -58,7 +59,11 @@ Route::middleware('auth')->group(function () {
     Route::get('payments/list', [PaymentController::class, 'index'])->name('pos.payments.index');
     Route::post('payments', [PaymentController::class, 'store'])->name('pos.payments.store');
     Route::get('reports', [ReportController::class, 'index'])->name('pos.reports');
-    Route::view('expenses', 'pos.page', ['title' => 'Expenses'])->name('pos.expenses');
+    Route::get('expenses', [ExpenseController::class, 'dashboard'])->name('pos.expenses');
+    Route::view('expenses/create', 'pos.page', ['title' => 'Create Expense'])->name('pos.expenses.create');
+    Route::view('expenses/list', 'pos.page', ['title' => 'Expense List'])->name('pos.expenses.list');
+    Route::get('expenses/heads', [ExpenseController::class, 'heads'])->name('pos.expenses.heads');
+    Route::post('expenses/heads', [ExpenseController::class, 'storeHead'])->name('pos.expenses.heads.store');
     Route::get('settings', [SettingController::class, 'index'])->name('pos.settings');
     Route::get('settings/gst-rates', [SettingController::class, 'gstRates'])->name('pos.settings.gst-rates');
     Route::post('settings/gst-rates', [SettingController::class, 'storeGstRate'])->name('pos.settings.gst-rates.store');
