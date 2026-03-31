@@ -48,7 +48,7 @@
         <article class="pos-dashboard-card">
             <span class="pos-card-icon"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5v4.5l3 1.5"/></svg></span>
             <h2 class="mt-2 text-lg font-semibold text-slate-800">Total Due Amount</h2>
-            <p class="mt-1 text-sm text-slate-500">Rs 10,090,344.88</p>
+            <p class="mt-1 text-sm text-slate-500">Rs {{ number_format((float) ($totalDueAmount ?? 0), 2) }}</p>
         </article>
         <a href="{{ route('pos.reports') }}" class="pos-dashboard-card group">
             <span class="pos-card-icon"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><rect x="3.75" y="4.5" width="16.5" height="15" rx="1.5"/><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 15.75V12m4.5 3.75V9m4.5 6.75v-5.25"/></svg></span>

@@ -12,7 +12,10 @@ class DashboardController extends Controller
     {
         $totalInvoiceAmount = (float) Invoice::sum('total_amount');
         $totalPaymentReceived = (float) Payment::sum('amount');
+        $totalDueAmount = (float) Invoice::query()
+            ->where('status', 'unpaid')
+            ->sum('total_amount');
 
-        return view('dashboard', compact('totalInvoiceAmount', 'totalPaymentReceived'));
+        return view('dashboard', compact('totalInvoiceAmount', 'totalPaymentReceived', 'totalDueAmount'));
     }
 }
