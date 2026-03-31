@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Models\CompanyProfile;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use Illuminate\Database\Eloquent\Builder;
@@ -63,13 +64,17 @@ class ReportController extends Controller
             });
 
         $customers = Customer::orderBy('name')->get(['id', 'name', 'customer_code']);
+        $selectedCustomer = $customerId !== '' ? Customer::find($customerId, ['id', 'name', 'customer_code']) : null;
+        $companyProfile = CompanyProfile::first();
 
         return view('pos.reports', [
             'customers' => $customers,
+            'selectedCustomer' => $selectedCustomer,
             'itemRows' => $itemRows,
             'summary' => $summary,
             'hsnSummary' => $hsnSummary,
             'viewMode' => $view === 'hsn' ? 'hsn' : 'list',
+            'companyProfile' => $companyProfile,
         ]);
     }
 }

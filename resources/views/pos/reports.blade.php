@@ -3,15 +3,61 @@
 @section('title', 'GST Invoice Report — ' . config('app.name'))
 
 @section('page-content')
+    @php
+        $companyName = strtoupper($companyProfile?->company_name ?: config('app.name'));
+    @endphp
     <style>
         @media print {
+            header,
+            footer,
+            main > div:first-child {
+                display: none !important;
+            }
+            body,
+            main {
+                background: #fff !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            section {
+                max-width: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
             .report-no-print {
                 display: none !important;
             }
+            .report-print-wrap {
+                width: 194mm;
+                margin: 10mm auto 0;
+            }
+            .report-print-header {
+                display: flex !important;
+            }
+        }
+        .report-print-header {
+            display: none;
         }
     </style>
     <section class="mx-auto max-w-screen-2xl">
+        <div class="report-print-wrap">
+        <div class="report-print-header mb-3 items-center justify-between border-b border-slate-300 pb-3">
+            <div class="flex items-center gap-3">
+                @if (!empty($companyProfile?->logo_path))
+                    <img src="{{ asset($companyProfile->logo_path) }}" alt="Company Logo" class="h-10 w-auto object-contain">
+                @endif
+                <div>
+                    <p class="text-lg font-bold text-slate-800">{{ $companyName }}</p>
+                    <p class="text-xs text-slate-500">GST Invoice Report</p>
+                </div>
+            </div>
+            <div class="text-right text-xs text-slate-600">
+                <p>Date: {{ now()->format('d-m-Y') }}</p>
+                <p>Customer: {{ $selectedCustomer?->name ?: 'All Customers' }}</p>
+            </div>
+        </div>
         <h1 class="text-3xl font-semibold tracking-tight text-slate-800">GST Invoice Report</h1>
+        <p class="mt-1 text-sm text-slate-500">Customer: {{ $selectedCustomer?->name ?: 'All Customers' }}</p>
 
         <form method="GET" action="{{ route('pos.reports') }}" class="report-no-print mt-5 grid gap-3 rounded-lg border border-sky-100 bg-white p-4 md:grid-cols-6">
             <div>
@@ -161,5 +207,6 @@
                 {{ $itemRows->links() }}
             </div>
         @endif
+        </div>
     </section>
 @endsection
