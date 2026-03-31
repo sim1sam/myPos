@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Models\Invoice;
+use App\Models\Payment;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class CustomerController extends Controller
@@ -84,6 +87,69 @@ class CustomerController extends Controller
         $customer->delete();
 
         return redirect()->route('pos.customers.index')->with('success', 'Customer deleted successfully.');
+    }
+
+    public function summary(): View
+    {
+        $customerId = request('customer_id');
+        $customerSearch = trim((string) request('customer_search'));
+
+        $customers = Customer::orderBy('name')->get(['id', 'name', 'customer_code']);
+
+        $invoiceTotals = Invoice::query()
+            ->select('customer_id', DB::raw('SUM(total_amount) as total_invoice'))
+            ->groupBy('customer_id');
+
+        $paymentTotals = Payment::query()
+            ->select('customer_id', DB::raw('SUM(amount) as total_payment'))
+            ->groupBy('customer_id');
+
+        $rows = Customer::query()
+            ->leftJoinSub($invoiceTotals, 'it', function ($join) {
+                $join->on('customers.id', '=', 'it.customer_id');
+            })
+            ->leftJoinSub($paymentTotals, 'pt', function ($join) {
+                $join->on('customers.id', '=', 'pt.customer_id');
+            })
+            ->when($customerId, fn ($q) => $q->where('customers.id', $customerId))
+            ->when($customerSearch !== '', function ($q) use ($customerSearch) {
+                $q->where(function ($sub) use ($customerSearch) {
+                    $sub->where('customers.name', 'like', '%' . $customerSearch . '%')
+                        ->orWhere('customers.customer_code', 'like', '%' . $customerSearch . '%');
+                });
+            })
+            ->orderBy('customers.name')
+            ->paginate(15, [
+                'customers.id',
+                'customers.customer_code',
+                'customers.name',
+                DB::raw('COALESCE(it.total_invoice, 0) as total_invoice'),
+                DB::raw('COALESCE(pt.total_payment, 0) as total_payment'),
+            ])
+            ->withQueryString();
+
+        return view('pos.customers-summary', compact('rows', 'customers'));
+    }
+
+    public function summaryDetails(Customer $customer): View
+    {
+        $invoices = Invoice::query()
+            ->where('customer_id', $customer->id)
+            ->latest('invoice_date')
+            ->latest('id')
+            ->get(['id', 'invoice_no', 'invoice_date', 'total_amount', 'status']);
+
+        $payments = Payment::query()
+            ->with('paymentMode:id,name')
+            ->where('customer_id', $customer->id)
+            ->latest('payment_date')
+            ->latest('id')
+            ->get(['id', 'customer_id', 'payment_mode_id', 'payment_date', 'amount', 'note']);
+
+        $totalInvoice = (float) $invoices->sum('total_amount');
+        $totalPayment = (float) $payments->sum('amount');
+
+        return view('pos.customers-summary-details', compact('customer', 'invoices', 'payments', 'totalInvoice', 'totalPayment'));
     }
 
     private function generateCustomerCode(string $name): string

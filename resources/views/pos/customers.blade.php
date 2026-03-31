@@ -33,7 +33,7 @@
                 <p class="mt-2 text-sm text-slate-500">View, edit, or filter the full customer list.</p>
             </a>
 
-            <a href="#" class="pos-dashboard-card group">
+            <a href="{{ route('pos.customers.summary') }}" class="pos-dashboard-card group">
                 <span class="pos-card-icon pos-card-icon-gold">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                         <rect x="3.75" y="4.5" width="16.5" height="15" rx="1.5" />
