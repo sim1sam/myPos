@@ -38,7 +38,7 @@
         <article class="pos-dashboard-card">
             <span class="pos-card-icon pos-card-icon-gold"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m3-9H9m6 6H9"/><circle cx="12" cy="12" r="9" /></svg></span>
             <h2 class="mt-2 text-lg font-semibold text-slate-800">Total Invoice Amount</h2>
-            <p class="mt-1 text-sm text-slate-500">Rs 15,386,191.88</p>
+            <p class="mt-1 text-sm text-slate-500">Rs {{ number_format((float) ($totalInvoiceAmount ?? 0), 2) }}</p>
         </article>
         <article class="pos-dashboard-card">
             <span class="pos-card-icon"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="18" height="12" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M3 10.5h18"/></svg></span>

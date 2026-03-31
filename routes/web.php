@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PurchaseController;
@@ -18,7 +19,7 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-    Route::view('dashboard', 'dashboard')->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('sales', [InvoiceController::class, 'create'])->name('pos.sales');
     Route::get('purchases', [PurchaseController::class, 'dashboard'])->name('pos.purchases');
     Route::get('purchases/create', [PurchaseController::class, 'create'])->name('pos.purchases.create');
