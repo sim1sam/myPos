@@ -56,6 +56,12 @@
             <p class="mt-1 text-sm text-slate-500">View GST report</p>
         </a>
 
+        <a href="{{ route('pos.expenses') }}" class="pos-dashboard-card group">
+            <span class="pos-card-icon"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 6.75h15m-15 4.5h15m-15 4.5h9"/><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 18.75h5.25m-2.625-2.625v5.25"/></svg></span>
+            <h2 class="mt-2 text-lg font-semibold text-slate-800">Expenses</h2>
+            <p class="mt-1 text-sm text-slate-500">Track and manage expenses</p>
+        </a>
+
         <a href="{{ route('pos.inventory') }}" class="pos-dashboard-card group">
             <span class="pos-card-icon"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5.25v13.5m6.75-6.75h-13.5"/></svg></span>
             <h2 class="mt-2 text-lg font-semibold text-slate-800">Add Payment</h2>
