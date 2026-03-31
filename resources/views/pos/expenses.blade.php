@@ -6,6 +6,11 @@
     <section>
         <h1 class="text-3xl font-semibold tracking-tight text-slate-800">Expenses</h1>
 
+        <div class="mt-4 rounded-lg border border-sky-100 bg-white px-4 py-3 shadow-sm">
+            <p class="text-sm text-slate-500">Total Expense Amount</p>
+            <p class="mt-1 text-2xl font-bold text-sky-700">Rs {{ number_format((float) ($totalExpenseAmount ?? 0), 2) }}</p>
+        </div>
+
         <div class="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             <a href="{{ route('pos.expenses.create') }}" class="pos-dashboard-card group">
                 <span class="pos-card-icon">

@@ -60,8 +60,12 @@ Route::middleware('auth')->group(function () {
     Route::post('payments', [PaymentController::class, 'store'])->name('pos.payments.store');
     Route::get('reports', [ReportController::class, 'index'])->name('pos.reports');
     Route::get('expenses', [ExpenseController::class, 'dashboard'])->name('pos.expenses');
-    Route::view('expenses/create', 'pos.page', ['title' => 'Create Expense'])->name('pos.expenses.create');
-    Route::view('expenses/list', 'pos.page', ['title' => 'Expense List'])->name('pos.expenses.list');
+    Route::get('expenses/create', [ExpenseController::class, 'create'])->name('pos.expenses.create');
+    Route::post('expenses', [ExpenseController::class, 'store'])->name('pos.expenses.store');
+    Route::get('expenses/list', [ExpenseController::class, 'index'])->name('pos.expenses.list');
+    Route::get('expenses/{expense}/edit', [ExpenseController::class, 'edit'])->name('pos.expenses.edit');
+    Route::put('expenses/{expense}', [ExpenseController::class, 'update'])->name('pos.expenses.update');
+    Route::delete('expenses/{expense}', [ExpenseController::class, 'destroy'])->name('pos.expenses.destroy');
     Route::get('expenses/heads', [ExpenseController::class, 'heads'])->name('pos.expenses.heads');
     Route::post('expenses/heads', [ExpenseController::class, 'storeHead'])->name('pos.expenses.heads.store');
     Route::get('settings', [SettingController::class, 'index'])->name('pos.settings');
