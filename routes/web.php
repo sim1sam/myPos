@@ -59,8 +59,11 @@ Route::middleware('auth')->group(function () {
     Route::post('payments', [PaymentController::class, 'store'])->name('pos.payments.store');
     Route::get('reports', [ReportController::class, 'index'])->name('pos.reports');
     Route::get('settings', [SettingController::class, 'index'])->name('pos.settings');
+    Route::view('settings/gst-rates', 'pos.page', ['title' => 'GST Rates'])->name('pos.settings.gst-rates');
     Route::get('settings/payment-modes', [SettingController::class, 'paymentModes'])->name('pos.settings.payment-modes.index');
     Route::get('settings/payment-modes/create', [SettingController::class, 'createPaymentMode'])->name('pos.settings.payment-modes.create');
     Route::post('settings/payment-modes', [SettingController::class, 'storePaymentMode'])->name('pos.settings.payment-modes.store');
+    Route::view('settings/users', 'pos.page', ['title' => 'Users'])->name('pos.settings.users');
+    Route::view('settings/company-profile', 'pos.page', ['title' => 'Company Profile'])->name('pos.settings.company-profile');
     Route::post('logout', [LoginController::class, 'destroy'])->name('logout');
 });
