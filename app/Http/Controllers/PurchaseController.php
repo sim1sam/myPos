@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\GstRate;
 use App\Models\Purchase;
 use App\Models\Vendor;
 use Illuminate\Http\RedirectResponse;
@@ -18,8 +19,13 @@ class PurchaseController extends Controller
     public function create(): View
     {
         $vendors = Vendor::orderBy('name')->get();
+        $gstRates = GstRate::query()
+            ->orderBy('hsn_sac')
+            ->get(['hsn_sac', 'description']);
+        $hsnSacOptions = $gstRates->pluck('hsn_sac');
+        $hsnDescriptions = $gstRates->mapWithKeys(fn ($rate) => [$rate->hsn_sac => (string) ($rate->description ?? '')]);
 
-        return view('pos.purchases-create', compact('vendors'));
+        return view('pos.purchases-create', compact('vendors', 'hsnSacOptions', 'hsnDescriptions'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -68,8 +74,13 @@ class PurchaseController extends Controller
     public function edit(Purchase $purchase): View
     {
         $vendors = Vendor::orderBy('name')->get();
+        $gstRates = GstRate::query()
+            ->orderBy('hsn_sac')
+            ->get(['hsn_sac', 'description']);
+        $hsnSacOptions = $gstRates->pluck('hsn_sac');
+        $hsnDescriptions = $gstRates->mapWithKeys(fn ($rate) => [$rate->hsn_sac => (string) ($rate->description ?? '')]);
 
-        return view('pos.purchases-edit', compact('purchase', 'vendors'));
+        return view('pos.purchases-edit', compact('purchase', 'vendors', 'hsnSacOptions', 'hsnDescriptions'));
     }
 
     public function update(Request $request, Purchase $purchase): RedirectResponse

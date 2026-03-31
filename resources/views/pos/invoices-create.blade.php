@@ -111,6 +111,7 @@
     <script>
         (() => {
             const products = @json($products);
+            const gstRates = @json($gstRates ?? []);
             const hsnOptions = [...new Set(products.map((p) => p.hsn_sac))].sort();
             const tbody = document.getElementById('invoice-items-body');
             const addRowBtn = document.getElementById('add-row-btn');
@@ -131,20 +132,42 @@
 
             const formatMoney = (n) => Number(n || 0).toFixed(2);
 
+            const gstPercentForRow = (rowAmount, hsnSac) => {
+                const cfg = gstRates[hsnSac];
+                if (!cfg) return 0;
+
+                if (cfg.gst_type === 'simple') {
+                    return Number(cfg.simple_rate || 0);
+                }
+
+                const slabs = Array.isArray(cfg.slabs) ? cfg.slabs : [];
+                const match = slabs.find((slab) => {
+                    const min = Number(slab.min_amount || 0);
+                    const max = slab.max_amount === null ? null : Number(slab.max_amount);
+                    return rowAmount >= min && (max === null || rowAmount <= max);
+                });
+
+                return match ? Number(match.rate || 0) : 0;
+            };
+
             const renderTotals = () => {
                 let subtotal = 0;
+                let taxTotal = 0;
                 tbody.querySelectorAll('tr').forEach((row) => {
-                    subtotal += Number(row.querySelector('.item-amount').value || 0);
+                    const rowAmount = Number(row.querySelector('.item-amount').value || 0);
+                    const rowHsn = row.querySelector('.item-hsn').value || '';
+                    subtotal += rowAmount;
+                    taxTotal += rowAmount * (gstPercentForRow(rowAmount, rowHsn) / 100);
                 });
 
                 let sgst = 0;
                 let cgst = 0;
                 let igst = 0;
                 if (gstTypeEl.value === 'same') {
-                    sgst = subtotal * 0.09;
-                    cgst = subtotal * 0.09;
-                } else {
-                    igst = subtotal * 0.18;
+                    sgst = taxTotal / 2;
+                    cgst = taxTotal / 2;
+                } else if (gstTypeEl.value === 'other') {
+                    igst = taxTotal;
                 }
                 const total = subtotal + sgst + cgst + igst;
 

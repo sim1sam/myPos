@@ -59,7 +59,13 @@
 
                 <div>
                     <label for="hsn_sac" class="pos-label">HSN/SAC</label>
-                    <input id="hsn_sac" name="hsn_sac" type="text" value="{{ old('hsn_sac') }}" placeholder="Enter HSN/SAC code" class="pos-input @error('hsn_sac') pos-input-error @enderror">
+                    <select id="hsn_sac" name="hsn_sac" class="pos-input @error('hsn_sac') pos-input-error @enderror">
+                        <option value="">Select HSN/SAC</option>
+                        @foreach ($hsnSacOptions as $hsnSac)
+                            <option value="{{ $hsnSac }}" @selected(old('hsn_sac') == $hsnSac)>{{ $hsnSac }}</option>
+                        @endforeach
+                    </select>
+                    <p id="hsn_description_help" class="mt-1 text-xs text-rose-600"></p>
                     @error('hsn_sac')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -100,6 +106,9 @@
             const priceInput = document.getElementById('price');
             const qtyInput = document.getElementById('qty');
             const totalPreviewInput = document.getElementById('total_preview');
+            const hsnInput = document.getElementById('hsn_sac');
+            const hsnHelp = document.getElementById('hsn_description_help');
+            const hsnDescriptions = @json($hsnDescriptions ?? []);
 
             if (!priceInput || !qtyInput || !totalPreviewInput) return;
 
@@ -114,6 +123,18 @@
             priceInput.addEventListener('input', updateTotal);
             qtyInput.addEventListener('input', updateTotal);
             updateTotal();
+
+            const updateHsnDescription = () => {
+                if (!hsnInput || !hsnHelp) return;
+                const key = hsnInput.value || '';
+                const description = hsnDescriptions[key] || '';
+                hsnHelp.textContent = description ? `Description: ${description}` : '';
+            };
+
+            if (hsnInput) {
+                hsnInput.addEventListener('change', updateHsnDescription);
+                updateHsnDescription();
+            }
         })();
     </script>
 @endsection

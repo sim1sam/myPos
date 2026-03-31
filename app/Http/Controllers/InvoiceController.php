@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Models\GstRate;
 use App\Models\Invoice;
 use App\Models\Purchase;
 use Illuminate\Http\RedirectResponse;
@@ -21,8 +22,23 @@ class InvoiceController extends Controller
     {
         $customers = Customer::orderBy('name')->get();
         $products = $this->purchaseProducts();
+        $gstRates = GstRate::with(['slabs' => fn ($q) => $q->orderBy('min_amount')])
+            ->get()
+            ->mapWithKeys(function ($rate) {
+                return [
+                    $rate->hsn_sac => [
+                        'gst_type' => $rate->gst_type,
+                        'simple_rate' => (float) ($rate->simple_rate ?? 0),
+                        'slabs' => $rate->slabs->map(fn ($slab) => [
+                            'min_amount' => (float) $slab->min_amount,
+                            'max_amount' => $slab->max_amount !== null ? (float) $slab->max_amount : null,
+                            'rate' => (float) $slab->rate,
+                        ])->values(),
+                    ],
+                ];
+            });
 
-        return view('pos.invoices-create', compact('customers', 'products'));
+        return view('pos.invoices-create', compact('customers', 'products', 'gstRates'));
     }
 
     public function index(): View
