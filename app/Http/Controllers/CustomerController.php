@@ -7,6 +7,7 @@ use App\Models\Invoice;
 use App\Models\Payment;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -150,6 +151,103 @@ class CustomerController extends Controller
         $totalPayment = (float) $payments->sum('amount');
 
         return view('pos.customers-summary-details', compact('customer', 'invoices', 'payments', 'totalInvoice', 'totalPayment'));
+    }
+
+    public function ledger(Request $request): View
+    {
+        $customers = Customer::orderBy('name')->get(['id', 'name', 'customer_code', 'gstin', 'mobile']);
+
+        $customerId = $request->string('customer_id')->toString();
+        $gstFilter = $request->string('gst_filter')->toString() ?: 'all';
+        $from = $request->string('from')->toString() ?: now()->startOfMonth()->format('Y-m-d');
+        $to = $request->string('to')->toString() ?: now()->format('Y-m-d');
+
+        $selectedCustomer = null;
+        $entries = collect();
+        $openingBalance = 0.0;
+
+        if ($customerId !== '') {
+            $selectedCustomer = Customer::find($customerId);
+            if ($selectedCustomer) {
+                $fromDate = Carbon::parse($from)->startOfDay();
+                $toDate = Carbon::parse($to)->endOfDay();
+
+                $invoiceQuery = Invoice::query()
+                    ->where('customer_id', $selectedCustomer->id)
+                    ->when($gstFilter === 'gst', fn ($q) => $q->where('gst_type', '!=', 'none'))
+                    ->when($gstFilter === 'non_gst', fn ($q) => $q->where('gst_type', 'none'));
+
+                $paymentQuery = Payment::query()
+                    ->where('customer_id', $selectedCustomer->id);
+
+                $openingInvoice = (clone $invoiceQuery)
+                    ->where('invoice_date', '<', $fromDate->toDateString())
+                    ->sum('total_amount');
+                $openingPayment = (clone $paymentQuery)
+                    ->where('payment_date', '<', $fromDate->toDateString())
+                    ->sum('amount');
+                $openingBalance = (float) $openingInvoice - (float) $openingPayment;
+
+                $invoiceRows = (clone $invoiceQuery)
+                    ->whereBetween('invoice_date', [$fromDate->toDateString(), $toDate->toDateString()])
+                    ->orderBy('invoice_date')
+                    ->orderBy('id')
+                    ->get(['id', 'invoice_no', 'invoice_date', 'total_amount'])
+                    ->map(fn ($row) => [
+                        'date' => $row->invoice_date,
+                        'particular' => 'Invoice #' . $row->invoice_no,
+                        'debit' => (float) $row->total_amount,
+                        'credit' => 0.0,
+                        'sort_type' => 1,
+                    ]);
+
+                $paymentRows = (clone $paymentQuery)
+                    ->whereBetween('payment_date', [$fromDate->toDateString(), $toDate->toDateString()])
+                    ->orderBy('payment_date')
+                    ->orderBy('id')
+                    ->get(['id', 'payment_date', 'amount'])
+                    ->map(fn ($row) => [
+                        'date' => $row->payment_date,
+                        'particular' => 'Payment Received',
+                        'debit' => 0.0,
+                        'credit' => (float) $row->amount,
+                        'sort_type' => 2,
+                    ]);
+
+                $entries = $invoiceRows
+                    ->concat($paymentRows)
+                    ->sortBy([
+                        ['date', 'asc'],
+                        ['sort_type', 'asc'],
+                    ])
+                    ->values();
+
+                $runningBalance = $openingBalance;
+                $entries = $entries->map(function ($row) use (&$runningBalance) {
+                    $runningBalance += $row['debit'];
+                    $runningBalance -= $row['credit'];
+                    $row['balance'] = $runningBalance;
+                    return $row;
+                });
+            }
+        }
+
+        $totalDebit = (float) $entries->sum('debit');
+        $totalCredit = (float) $entries->sum('credit');
+        $closingBalance = $openingBalance + $totalDebit - $totalCredit;
+
+        return view('pos.customers-ledger', compact(
+            'customers',
+            'selectedCustomer',
+            'entries',
+            'gstFilter',
+            'from',
+            'to',
+            'openingBalance',
+            'totalDebit',
+            'totalCredit',
+            'closingBalance'
+        ));
     }
 
     private function generateCustomerCode(string $name): string
