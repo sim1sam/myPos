@@ -29,7 +29,7 @@
             <h2 class="mt-2 text-lg font-semibold text-slate-800">Customers</h2>
             <p class="mt-1 text-sm text-slate-500">Manage all customers</p>
         </a>
-        <a href="{{ route('pos.inventory') }}" class="pos-dashboard-card group">
+        <a href="{{ route('pos.payments.index') }}" class="pos-dashboard-card group">
             <span class="pos-card-icon pos-card-icon-gold"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 3.75h15A1.5 1.5 0 0 1 21 5.25v13.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.75V5.25a1.5 1.5 0 0 1 1.5-1.5Z"/></svg></span>
             <h2 class="mt-2 text-lg font-semibold text-slate-800">Customer Ledger</h2>
             <p class="mt-1 text-sm text-slate-500">Track customer transactions</p>
@@ -61,7 +61,7 @@
             <h2 class="mt-2 text-lg font-semibold text-slate-800">Add Payment</h2>
             <p class="mt-1 text-sm text-slate-500">Record a new customer payment</p>
         </a>
-        <a href="{{ route('pos.inventory') }}" class="pos-dashboard-card group">
+        <a href="{{ route('pos.payments.index') }}" class="pos-dashboard-card group">
             <span class="pos-card-icon pos-card-icon-gold"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><rect x="2.25" y="6.75" width="19.5" height="10.5" rx="1.5"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 10.5h19.5"/></svg></span>
             <h2 class="mt-2 text-lg font-semibold text-slate-800">Payments</h2>
             <p class="mt-1 text-sm text-slate-500">View all payments</p>

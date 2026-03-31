@@ -2,8 +2,10 @@
 
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SettingController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
@@ -48,8 +50,13 @@ Route::middleware('auth')->group(function () {
     Route::get('customers/{customer}/edit', [CustomerController::class, 'edit'])->name('pos.customers.edit');
     Route::put('customers/{customer}', [CustomerController::class, 'update'])->name('pos.customers.update');
     Route::delete('customers/{customer}', [CustomerController::class, 'destroy'])->name('pos.customers.destroy');
-    Route::view('inventory', 'pos.page', ['title' => 'Inventory'])->name('pos.inventory');
+    Route::get('inventory', [PaymentController::class, 'create'])->name('pos.inventory');
+    Route::get('payments/list', [PaymentController::class, 'index'])->name('pos.payments.index');
+    Route::post('payments', [PaymentController::class, 'store'])->name('pos.payments.store');
     Route::get('reports', [ReportController::class, 'index'])->name('pos.reports');
-    Route::view('settings', 'pos.page', ['title' => 'Settings'])->name('pos.settings');
+    Route::get('settings', [SettingController::class, 'index'])->name('pos.settings');
+    Route::get('settings/payment-modes', [SettingController::class, 'paymentModes'])->name('pos.settings.payment-modes.index');
+    Route::get('settings/payment-modes/create', [SettingController::class, 'createPaymentMode'])->name('pos.settings.payment-modes.create');
+    Route::post('settings/payment-modes', [SettingController::class, 'storePaymentMode'])->name('pos.settings.payment-modes.store');
     Route::post('logout', [LoginController::class, 'destroy'])->name('logout');
 });
