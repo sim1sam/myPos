@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Models\CompanyProfile;
 use App\Models\GstRate;
 use App\Models\Invoice;
 use App\Models\Purchase;
@@ -148,8 +149,9 @@ class InvoiceController extends Controller
     public function show(Invoice $invoice): View
     {
         $invoice->load('customer', 'items');
+        $companyProfile = CompanyProfile::first();
 
-        return view('pos.invoices-show', compact('invoice'));
+        return view('pos.invoices-show', compact('invoice', 'companyProfile'));
     }
 
     public function edit(Invoice $invoice): View

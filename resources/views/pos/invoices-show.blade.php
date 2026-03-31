@@ -4,7 +4,7 @@
 
 @section('page-content')
     @php
-        $companyName = strtoupper(config('app.name'));
+        $companyName = strtoupper($companyProfile?->company_name ?: config('app.name'));
         $itemGroups = $invoice->items->groupBy(fn ($item) => $item->hsn_sac ?: 'N/A');
     @endphp
 
@@ -78,7 +78,11 @@
         <div class="invoice-sheet rounded-lg border border-slate-300 bg-white p-6 shadow-sm">
             <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-300 pb-4">
                 <div>
-                    <h1 class="text-3xl font-black tracking-wide text-sky-800">{{ $companyName }}</h1>
+                    @if (!empty($companyProfile?->logo_path))
+                        <img src="{{ asset($companyProfile->logo_path) }}" alt="Company Logo" class="mb-2 h-12 w-auto object-contain">
+                    @else
+                        <h1 class="text-3xl font-black tracking-wide text-sky-800">{{ $companyName }}</h1>
+                    @endif
                     <p class="mt-1 text-xs text-slate-500">Tax Invoice</p>
                 </div>
                 <div class="text-right text-xs text-slate-700">
@@ -93,9 +97,10 @@
                 <div class="text-xs text-slate-700">
                     <p class="mb-1 text-[11px] font-bold uppercase tracking-wide text-slate-500">Billed By</p>
                     <p class="font-semibold text-slate-900">{{ $companyName }}</p>
-                    <p>{{ config('app.url') }}</p>
-                    <p>GSTIN: -</p>
-                    <p>Mobile: -</p>
+                    <p>{{ $companyProfile?->address ?: config('app.url') }}</p>
+                    <p>{{ $companyProfile?->city ?: '' }}{{ $companyProfile?->city && $companyProfile?->pin ? ', ' : '' }}{{ $companyProfile?->pin ?: '' }} {{ $companyProfile?->state ?: '' }}</p>
+                    <p>GSTIN: {{ $companyProfile?->company_gstin ?: '-' }}</p>
+                    <p>Mobile: {{ $companyProfile?->mobile_number ?: '-' }}</p>
                 </div>
                 <div class="text-xs text-slate-700">
                     <p class="mb-1 text-[11px] font-bold uppercase tracking-wide text-slate-500">Billed To</p>
@@ -200,19 +205,24 @@
             <div class="mt-5 grid gap-4 border-t border-slate-300 pt-4 md:grid-cols-2">
                 <div class="text-[11px] text-slate-700">
                     <p class="font-semibold">Payment Details</p>
-                    <p>A/C Name: {{ $companyName }}</p>
-                    <p>A/C Number: -</p>
-                    <p>IFSC Code: -</p>
-                    <p>Branch: -</p>
+                    <p>A/C Name: {{ $companyProfile?->account_holder_name ?: $companyName }}</p>
+                    <p>A/C Number: {{ $companyProfile?->account_number ?: '-' }}</p>
+                    <p>IFSC Code: {{ $companyProfile?->ifsc_code ?: '-' }}</p>
+                    <p>Branch: {{ $companyProfile?->branch ?: '-' }}</p>
+                    <p class="mt-2">{{ $companyProfile?->address ?: '-' }}</p>
                 </div>
                 <div class="text-right text-[11px] text-slate-700">
                     <p class="font-semibold">Declaration</p>
-                    <p>We declare that this invoice shows the actual price of the goods described.</p>
-                    <p>All particulars are true and correct.</p>
+                    <p>{{ $companyProfile?->declaration ?: 'We declare that this invoice shows the actual price of the goods described and all particulars are true and correct.' }}</p>
                     <p class="mt-6 font-semibold">{{ $companyName }}</p>
                     <p class="mt-4">Authorized Signatory</p>
                 </div>
             </div>
+            @if (!empty($companyProfile?->footer_text))
+                <div class="mt-3 border-t border-slate-200 pt-2 text-center text-[10px] text-slate-500">
+                    {{ $companyProfile->footer_text }}
+                </div>
+            @endif
         </div>
         </div>
     </section>

@@ -14,7 +14,7 @@ use Illuminate\View\View;
 class SettingController extends Controller
 {
     private const COMPANY_PROFILE_DEFAULTS = [
-        'company_name' => 'Wise Dynamic Private Limited',
+        'company_name' => 'WISE DYNAMIC PRIVATE LIMITED',
         'company_email' => 'hello@wisedynamic.in',
         'mobile_number' => '6290731704',
         'company_gstin' => '19AADCW5913E1ZA',
@@ -22,7 +22,7 @@ class SettingController extends Controller
         'city' => 'Kolkata',
         'pin' => '700094',
         'state' => 'West Bengal',
-        'account_holder_name' => 'Wise Dynamic Private Limited',
+        'account_holder_name' => 'WISE DYNAMIC PRIVATE LIMITED',
         'account_number' => '572005000003',
         'bank_name' => 'ICICI Bank',
         'branch' => 'Chak Garia, Kolkata',
