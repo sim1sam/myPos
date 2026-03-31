@@ -64,6 +64,7 @@ Route::middleware('auth')->group(function () {
     Route::get('settings/payment-modes/create', [SettingController::class, 'createPaymentMode'])->name('pos.settings.payment-modes.create');
     Route::post('settings/payment-modes', [SettingController::class, 'storePaymentMode'])->name('pos.settings.payment-modes.store');
     Route::view('settings/users', 'pos.page', ['title' => 'Users'])->name('pos.settings.users');
-    Route::view('settings/company-profile', 'pos.page', ['title' => 'Company Profile'])->name('pos.settings.company-profile');
+    Route::get('settings/company-profile', [SettingController::class, 'companyProfile'])->name('pos.settings.company-profile');
+    Route::post('settings/company-profile', [SettingController::class, 'updateCompanyProfile'])->name('pos.settings.company-profile.update');
     Route::post('logout', [LoginController::class, 'destroy'])->name('logout');
 });
