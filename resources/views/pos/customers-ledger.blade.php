@@ -10,8 +10,8 @@
         }
 
         .ledger-sheet {
-            width: 100%;
-            max-width: 210mm;
+            width: calc(100% - 32px);
+            max-width: 1120px;
             margin: 0 auto;
         }
 
@@ -41,8 +41,8 @@
             }
 
             .ledger-sheet {
-                width: 194mm !important;
-                max-width: 194mm !important;
+                width: 186mm !important;
+                max-width: 186mm !important;
                 margin: 0 auto !important;
                 border: 0 !important;
                 box-shadow: none !important;
@@ -50,7 +50,7 @@
         }
     </style>
 
-    <section class="mx-auto max-w-5xl">
+    <section class="mx-auto max-w-7xl">
         <h1 class="ledger-no-print text-4xl font-semibold tracking-tight text-slate-800">Customer Ledger</h1>
 
         <form method="GET" action="{{ route('pos.customers.ledger') }}" class="ledger-no-print mt-5 grid gap-3 rounded-lg border border-sky-100 bg-white p-4 md:grid-cols-6">
@@ -93,14 +93,15 @@
             </button>
         </div>
 
-        <div class="ledger-sheet mt-4 rounded-lg border border-slate-300 bg-white p-5 shadow-sm">
+        <div class="ledger-sheet mt-4 rounded-lg border border-slate-300 bg-white p-7 shadow-sm">
+            <div class="px-5 md:px-8">
             <div class="text-center">
-                <h2 class="text-3xl font-black tracking-wide text-sky-800">{{ strtoupper(config('app.name')) }}</h2>
-                <p class="text-xs text-slate-600">{{ config('app.url') }}</p>
-                <p class="text-xs text-slate-600">Phone: - | GSTIN: -</p>
+                <h2 class="text-4xl font-black tracking-wide text-sky-800">{{ strtoupper(config('app.name')) }}</h2>
+                <p class="text-sm text-slate-600">{{ config('app.url') }}</p>
+                <p class="text-sm text-slate-600">Phone: - | GSTIN: -</p>
             </div>
 
-            <div class="mt-4 grid gap-3 text-xs text-slate-700 md:grid-cols-3">
+            <div class="mt-5 grid gap-3 text-sm text-slate-700 md:grid-cols-3">
                 <div>
                     <p><span class="font-semibold">Customer:</span> {{ $selectedCustomer?->name ?: '-' }}</p>
                     <p><span class="font-semibold">GSTIN:</span> {{ $selectedCustomer?->gstin ?: '-' }}</p>
@@ -116,7 +117,7 @@
             </div>
 
             <div class="mt-4 overflow-x-auto">
-                <table class="min-w-full border border-slate-300 text-xs">
+                <table class="min-w-full border border-slate-300 text-sm">
                     <thead class="bg-slate-100 text-left text-slate-700">
                         <tr>
                             <th class="border border-slate-300 px-2 py-2 font-semibold">Date</th>
@@ -165,6 +166,7 @@
                         </tr>
                     </tbody>
                 </table>
+            </div>
             </div>
         </div>
     </section>
