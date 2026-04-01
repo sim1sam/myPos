@@ -35,6 +35,16 @@
                     @error('email')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
                 </div>
                 <div>
+                    <label class="pos-label" for="role_id">Role</label>
+                    <select id="role_id" name="role_id" class="pos-input @error('role_id') pos-input-error @enderror">
+                        <option value="">Select Role</option>
+                        @foreach ($roles as $role)
+                            <option value="{{ $role->id }}" @selected(old('role_id') == $role->id)>{{ $role->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('role_id')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
+                </div>
+                <div>
                     <label class="pos-label" for="password">Password</label>
                     <input id="password" name="password" type="password" class="pos-input @error('password') pos-input-error @enderror" placeholder="Enter password" required>
                     @error('password')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
@@ -53,6 +63,7 @@
                             <th class="px-4 py-3 font-semibold">SL#</th>
                             <th class="px-4 py-3 font-semibold">Name</th>
                             <th class="px-4 py-3 font-semibold">Email</th>
+                            <th class="px-4 py-3 font-semibold">Role</th>
                             <th class="px-4 py-3 font-semibold">Created On</th>
                             <th class="px-4 py-3 font-semibold">Action</th>
                         </tr>
@@ -65,6 +76,7 @@
                                 </td>
                                 <td class="px-4 py-3 font-medium text-slate-700">{{ $user->name }}</td>
                                 <td class="px-4 py-3">{{ $user->email }}</td>
+                                <td class="px-4 py-3">{{ $user->role?->name ?: '-' }}</td>
                                 <td class="px-4 py-3">{{ optional($user->created_at)->format('d-m-Y') }}</td>
                                 <td class="px-4 py-3">
                                     <div class="flex items-center gap-2">
@@ -81,7 +93,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-4 py-8 text-center text-slate-500">No users found.</td>
+                                <td colspan="6" class="px-4 py-8 text-center text-slate-500">No users found.</td>
                             </tr>
                         @endforelse
                     </tbody>

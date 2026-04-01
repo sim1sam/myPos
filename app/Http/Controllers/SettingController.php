@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CompanyProfile;
 use App\Models\GstRate;
 use App\Models\PaymentMode;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,6 +16,18 @@ use Illuminate\View\View;
 
 class SettingController extends Controller
 {
+    private const ROLE_FUNCTION_OPTIONS = [
+        'dashboard' => 'Dashboard',
+        'pos' => 'POS',
+        'purchases' => 'Purchases',
+        'vendors' => 'Vendors',
+        'invoices' => 'Invoices',
+        'customers' => 'Customers',
+        'payments' => 'Payments',
+        'reports' => 'Reports',
+        'expenses' => 'Expenses',
+        'settings' => 'Settings',
+    ];
     private const COMPANY_PROFILE_DEFAULTS = [
         'company_name' => 'WISE DYNAMIC PRIVATE LIMITED',
         'company_email' => 'hello@wisedynamic.in',
@@ -209,10 +222,12 @@ class SettingController extends Controller
     public function users(): View
     {
         $users = User::query()
+            ->with('role:id,name')
             ->latest()
             ->paginate(15);
+        $roles = Role::orderBy('name')->get(['id', 'name']);
 
-        return view('pos.users', compact('users'));
+        return view('pos.users', compact('users', 'roles'));
     }
 
     public function storeUser(Request $request): RedirectResponse
@@ -221,6 +236,7 @@ class SettingController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:6'],
+            'role_id' => ['nullable', 'exists:roles,id'],
         ]);
 
         User::create($data);
@@ -230,7 +246,9 @@ class SettingController extends Controller
 
     public function editUser(User $user): View
     {
-        return view('pos.users-edit', compact('user'));
+        $roles = Role::orderBy('name')->get(['id', 'name']);
+
+        return view('pos.users-edit', compact('user', 'roles'));
     }
 
     public function updateUser(Request $request, User $user): RedirectResponse
@@ -239,6 +257,7 @@ class SettingController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
             'password' => ['nullable', 'string', 'min:6'],
+            'role_id' => ['nullable', 'exists:roles,id'],
         ]);
 
         if (empty($data['password'])) {
@@ -259,5 +278,31 @@ class SettingController extends Controller
         $user->delete();
 
         return redirect()->route('pos.settings.users')->with('success', 'User deleted successfully.');
+    }
+
+    public function roles(): View
+    {
+        $roles = Role::query()->orderBy('name')->paginate(15);
+
+        return view('pos.roles', [
+            'roles' => $roles,
+            'functionOptions' => self::ROLE_FUNCTION_OPTIONS,
+        ]);
+    }
+
+    public function storeRole(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:100', 'unique:roles,name'],
+            'permissions' => ['nullable', 'array'],
+            'permissions.*' => ['string'],
+        ]);
+
+        Role::create([
+            'name' => $data['name'],
+            'permissions' => array_values($data['permissions'] ?? []),
+        ]);
+
+        return redirect()->route('pos.settings.roles')->with('success', 'Role created successfully.');
     }
 }

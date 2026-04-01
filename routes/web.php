@@ -74,6 +74,8 @@ Route::middleware('auth')->group(function () {
     Route::get('settings/payment-modes', [SettingController::class, 'paymentModes'])->name('pos.settings.payment-modes.index');
     Route::get('settings/payment-modes/create', [SettingController::class, 'createPaymentMode'])->name('pos.settings.payment-modes.create');
     Route::post('settings/payment-modes', [SettingController::class, 'storePaymentMode'])->name('pos.settings.payment-modes.store');
+    Route::get('settings/roles', [SettingController::class, 'roles'])->name('pos.settings.roles');
+    Route::post('settings/roles', [SettingController::class, 'storeRole'])->name('pos.settings.roles.store');
     Route::get('settings/users', [SettingController::class, 'users'])->name('pos.settings.users');
     Route::post('settings/users', [SettingController::class, 'storeUser'])->name('pos.settings.users.store');
     Route::get('settings/users/{user}/edit', [SettingController::class, 'editUser'])->name('pos.settings.users.edit');

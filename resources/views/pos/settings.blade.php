@@ -40,6 +40,17 @@
                 <p class="mt-2 text-sm text-slate-500">Manage system users and roles.</p>
             </a>
 
+            <a href="{{ route('pos.settings.roles') }}" class="pos-dashboard-card group">
+                <span class="pos-card-icon">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h3m-7.5 6h12m-9 6h6"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h3m0 0a1.5 1.5 0 1 0 3 0m-3 0H3m18 6h-3m0 0a1.5 1.5 0 1 0-3 0m3 0h3M3 18h6m0 0a1.5 1.5 0 1 0 3 0m-3 0H3"/>
+                    </svg>
+                </span>
+                <h2 class="mt-2 text-xl font-semibold text-slate-800">Role System</h2>
+                <p class="mt-2 text-sm text-slate-500">Create role and select user-wise functions.</p>
+            </a>
+
             <a href="{{ route('pos.settings.company-profile') }}" class="pos-dashboard-card group">
                 <span class="pos-card-icon pos-card-icon-gold">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">

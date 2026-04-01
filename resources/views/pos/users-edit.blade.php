@@ -24,6 +24,16 @@
                     @error('email')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
                 </div>
                 <div>
+                    <label class="pos-label" for="role_id">Role</label>
+                    <select id="role_id" name="role_id" class="pos-input @error('role_id') pos-input-error @enderror">
+                        <option value="">Select Role</option>
+                        @foreach ($roles as $role)
+                            <option value="{{ $role->id }}" @selected(old('role_id', $user->role_id) == $role->id)>{{ $role->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('role_id')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
+                </div>
+                <div>
                     <label class="pos-label" for="password">Password (optional)</label>
                     <input id="password" name="password" type="password" class="pos-input @error('password') pos-input-error @enderror" placeholder="Leave blank to keep current">
                     @error('password')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
