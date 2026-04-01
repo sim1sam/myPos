@@ -188,7 +188,7 @@
             <footer class="mt-auto border-t border-sky-100 bg-white/80 backdrop-blur-sm">
                 <div class="mx-auto flex max-w-screen-2xl flex-wrap items-center justify-between gap-3 px-4 py-3 text-xs text-slate-500 sm:px-6 lg:px-8">
                     <p>&copy; {{ date('Y') }} {{ config('app.name') }}</p>
-                    <p>Designed for POS workflow</p>
+                    <p> Design and Develop BY Wise Dynamic IT</p>
                 </div>
             </footer>
         </div>
