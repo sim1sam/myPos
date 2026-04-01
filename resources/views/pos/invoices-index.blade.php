@@ -6,7 +6,9 @@
     <section>
         <div class="flex items-end justify-between gap-4">
             <h1 class="text-3xl font-semibold tracking-tight text-slate-800">{{ $pageTitle }}</h1>
-            <a href="{{ route('pos.invoices.create') }}" class="pos-btn-primary w-auto! px-5 py-2.5">Create Invoice</a>
+            <a href="{{ route($createRoute ?? 'pos.invoices.create') }}" class="pos-btn-primary w-auto! px-5 py-2.5">
+                {{ ($isFreeInvoice ?? false) ? 'Create Free Invoice' : 'Create Invoice' }}
+            </a>
         </div>
         @if (session('success'))
             <div class="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
@@ -14,12 +16,14 @@
             </div>
         @endif
 
-        <div class="mt-4 flex flex-wrap gap-2">
-            <a href="{{ route('pos.invoices.index') }}" class="pos-btn-ghost {{ ($scope ?? 'all') === 'all' ? 'bg-sky-50 text-sky-700 ring-1 ring-sky-100' : '' }}">All Invoices</a>
-            <a href="{{ route('pos.invoices.index', ['scope' => 'gst']) }}" class="pos-btn-ghost {{ ($scope ?? 'all') === 'gst' ? 'bg-sky-50 text-sky-700 ring-1 ring-sky-100' : '' }}">GST Invoices</a>
-        </div>
+        @if (!($isFreeInvoice ?? false))
+            <div class="mt-4 flex flex-wrap gap-2">
+                <a href="{{ route($listRoute ?? 'pos.invoices.index') }}" class="pos-btn-ghost {{ ($scope ?? 'all') === 'all' ? 'bg-sky-50 text-sky-700 ring-1 ring-sky-100' : '' }}">All Invoices</a>
+                <a href="{{ route($listRoute ?? 'pos.invoices.index', ['scope' => 'gst']) }}" class="pos-btn-ghost {{ ($scope ?? 'all') === 'gst' ? 'bg-sky-50 text-sky-700 ring-1 ring-sky-100' : '' }}">GST Invoices</a>
+            </div>
+        @endif
 
-        <form method="GET" action="{{ route('pos.invoices.index') }}" class="mt-4 grid gap-3 rounded-lg border border-sky-100 bg-white p-4 md:grid-cols-5">
+        <form method="GET" action="{{ route($listRoute ?? 'pos.invoices.index') }}" class="mt-4 grid gap-3 rounded-lg border border-sky-100 bg-white p-4 md:grid-cols-5">
             <input type="hidden" name="scope" value="{{ $scope ?? 'all' }}">
             <div>
                 <label class="pos-label" for="customer_id">Customer</label>
@@ -51,7 +55,7 @@
             </div>
             <div class="flex items-end gap-2">
                 <button type="submit" class="pos-btn-primary w-auto! px-5 py-2.5">Filter</button>
-                <a href="{{ route('pos.invoices.index', ['scope' => $scope ?? 'all']) }}" class="pos-btn-ghost py-2.5">Clear</a>
+                <a href="{{ route($listRoute ?? 'pos.invoices.index', ['scope' => $scope ?? 'all']) }}" class="pos-btn-ghost py-2.5">Clear</a>
             </div>
         </form>
 

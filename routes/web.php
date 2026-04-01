@@ -40,6 +40,9 @@ Route::middleware(['auth', 'role.access'])->group(function () {
     Route::get('invoices/create', [InvoiceController::class, 'create'])->name('pos.invoices.create');
     Route::post('invoices', [InvoiceController::class, 'store'])->name('pos.invoices.store');
     Route::get('invoices/list', [InvoiceController::class, 'index'])->name('pos.invoices.index');
+    Route::get('invoices/free/create', [InvoiceController::class, 'freeCreate'])->name('pos.invoices.free.create');
+    Route::post('invoices/free', [InvoiceController::class, 'freeStore'])->name('pos.invoices.free.store');
+    Route::get('invoices/free/list', [InvoiceController::class, 'freeIndex'])->name('pos.invoices.free.index');
     Route::get('invoices/{invoice}', [InvoiceController::class, 'show'])->name('pos.invoices.show');
     Route::get('invoices/{invoice}/edit', [InvoiceController::class, 'edit'])->name('pos.invoices.edit');
     Route::put('invoices/{invoice}', [InvoiceController::class, 'update'])->name('pos.invoices.update');

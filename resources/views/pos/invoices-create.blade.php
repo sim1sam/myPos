@@ -1,16 +1,16 @@
 @extends('layouts.pos-app')
 
-@section('title', 'Create Invoice — ' . config('app.name'))
+@section('title', ($pageTitle ?? 'Create Invoice') . ' — ' . config('app.name'))
 
 @section('page-content')
     <section class="mx-auto max-w-screen-2xl">
         <div class="pos-dashboard-card">
             <div class="flex flex-wrap items-center justify-between gap-3">
-                <h1 class="text-2xl font-semibold text-slate-800">Create Invoice</h1>
-                <a href="{{ route('pos.customers.create', ['redirect_to' => 'pos.invoices.create']) }}" class="pos-btn-primary w-auto! px-5 py-2.5">+ Add Customer</a>
+                <h1 class="text-2xl font-semibold text-slate-800">{{ $pageTitle ?? 'Create Invoice' }}</h1>
+                <a href="{{ route('pos.customers.create', ['redirect_to' => ($isFreeInvoice ?? false) ? 'pos.invoices.free.create' : 'pos.invoices.create']) }}" class="pos-btn-primary w-auto! px-5 py-2.5">+ Add Customer</a>
             </div>
 
-            <form method="POST" action="{{ route('pos.invoices.store') }}" class="mt-6 space-y-5" id="invoice-form">
+            <form method="POST" action="{{ route($storeRoute ?? 'pos.invoices.store') }}" class="mt-6 space-y-5" id="invoice-form">
                 @csrf
                 <input type="hidden" name="items_json" id="items_json">
                 <input type="hidden" name="subtotal" id="subtotal_input" value="0">
@@ -101,7 +101,7 @@
                 </div>
 
                 <div class="flex items-center justify-end gap-3 pt-2">
-                    <a href="{{ route('pos.invoices.index') }}" class="pos-btn-ghost">Invoice List</a>
+                    <a href="{{ route($listRoute ?? 'pos.invoices.index') }}" class="pos-btn-ghost">Invoice List</a>
                     <button type="submit" class="pos-btn-primary w-auto! px-6">Submit Invoice</button>
                 </div>
             </form>
@@ -110,6 +110,7 @@
 
     <script>
         (() => {
+            const isFreeInvoice = @json($isFreeInvoice ?? false);
             const products = @json($products);
             const gstRates = @json($gstRates ?? []);
             const hsnOptions = [...new Set(products.map((p) => p.hsn_sac))].sort();
@@ -187,9 +188,10 @@
                 <tr>
                     <td class="px-3 py-2 align-top text-slate-700">${sl}</td>
                     <td class="px-3 py-2 min-w-80">
-                        <select class="pos-input item-description" multiple size="4"></select>
-                        <p class="mt-1 text-xs text-slate-500">Use Ctrl/Cmd to select multiple products.</p>
-                        <button type="button" class="mt-2 pos-btn-ghost split-products text-xs">Add Selected as Rows</button>
+                        ${isFreeInvoice
+                            ? '<input type="text" class="pos-input item-description-text" placeholder="Enter description">'
+                            : '<select class="pos-input item-description" multiple size="4"></select><p class="mt-1 text-xs text-slate-500">Use Ctrl/Cmd to select multiple products.</p><button type="button" class="mt-2 pos-btn-ghost split-products text-xs">Add Selected as Rows</button>'
+                        }
                     </td>
                     <td class="px-3 py-2 min-w-56">
                         <select class="pos-input item-hsn">
@@ -209,6 +211,7 @@
             const bindRowEvents = (row) => {
                 const hsnEl = row.querySelector('.item-hsn');
                 const descEl = row.querySelector('.item-description');
+                const descTextEl = row.querySelector('.item-description-text');
                 const rateEl = row.querySelector('.item-rate');
                 const qtyEl = row.querySelector('.item-qty');
                 const unitEl = row.querySelector('.item-unit');
@@ -226,6 +229,9 @@
                 };
 
                 const populateDescriptions = () => {
+                    if (isFreeInvoice || !descEl) {
+                        return;
+                    }
                 const filtered = products
                         .filter((p) => p.hsn_sac === hsnEl.value)
                         .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
@@ -247,6 +253,9 @@
                 };
 
                 const splitSelectedProducts = () => {
+                    if (isFreeInvoice || !descEl) {
+                        return;
+                    }
                     const selected = [...descEl.selectedOptions].filter((opt) => opt.value);
                     if (selected.length <= 1) return;
 
@@ -270,11 +279,18 @@
                 };
 
                 hsnEl.addEventListener('change', populateDescriptions);
-                descEl.addEventListener('change', onDescriptionChange);
+                if (descEl) {
+                    descEl.addEventListener('change', onDescriptionChange);
+                }
+                if (descTextEl) {
+                    descTextEl.addEventListener('input', onDescriptionChange);
+                }
                 rateEl.addEventListener('input', calcAmount);
                 qtyEl.addEventListener('input', calcAmount);
                 discountEl.addEventListener('input', calcAmount);
-                splitBtn.addEventListener('click', splitSelectedProducts);
+                if (splitBtn) {
+                    splitBtn.addEventListener('click', splitSelectedProducts);
+                }
                 row.querySelector('.remove-row').addEventListener('click', () => {
                     row.remove();
                     refreshSerials();
@@ -307,9 +323,12 @@
             addRowBtn.addEventListener('click', addRow);
             formEl.addEventListener('submit', (e) => {
                 const items = [...tbody.querySelectorAll('tr')].map((row) => {
-                    const selected = row.querySelector('.item-description').selectedOptions[0];
+                    const descriptionSelect = row.querySelector('.item-description');
+                    const selected = descriptionSelect ? descriptionSelect.selectedOptions[0] : null;
                     return {
-                        description: selected ? selected.textContent.trim() : '',
+                        description: isFreeInvoice
+                            ? (row.querySelector('.item-description-text')?.value || '').trim()
+                            : (selected ? selected.textContent.trim() : ''),
                         hsn_sac: row.querySelector('.item-hsn').value || '',
                         rate: Number(row.querySelector('.item-rate').value || 0),
                         qty: Number(row.querySelector('.item-qty').value || 0),

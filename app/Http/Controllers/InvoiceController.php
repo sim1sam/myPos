@@ -14,12 +14,25 @@ use Illuminate\View\View;
 
 class InvoiceController extends Controller
 {
+    private const KIND_STANDARD = 'standard';
+    private const KIND_FREE = 'free';
+
     public function dashboard(): View
     {
         return view('pos.invoices');
     }
 
     public function create(): View
+    {
+        return $this->invoiceCreateView(self::KIND_STANDARD);
+    }
+
+    public function freeCreate(): View
+    {
+        return $this->invoiceCreateView(self::KIND_FREE);
+    }
+
+    private function invoiceCreateView(string $kind): View
     {
         $customers = Customer::orderBy('name')->get();
         $products = $this->purchaseProducts();
@@ -39,13 +52,31 @@ class InvoiceController extends Controller
                 ];
             });
 
-        return view('pos.invoices-create', compact('customers', 'products', 'gstRates'));
+        $isFreeInvoice = $kind === self::KIND_FREE;
+        $storeRoute = $isFreeInvoice ? 'pos.invoices.free.store' : 'pos.invoices.store';
+        $listRoute = $isFreeInvoice ? 'pos.invoices.free.index' : 'pos.invoices.index';
+        $pageTitle = $isFreeInvoice ? 'Create Free Invoice' : 'Create Invoice';
+
+        return view('pos.invoices-create', compact('customers', 'products', 'gstRates', 'isFreeInvoice', 'storeRoute', 'listRoute', 'pageTitle'));
     }
 
     public function index(): View
     {
+        return $this->invoiceListView(self::KIND_STANDARD);
+    }
+
+    public function freeIndex(): View
+    {
+        return $this->invoiceListView(self::KIND_FREE);
+    }
+
+    private function invoiceListView(string $kind): View
+    {
         $scope = request('scope', 'all');
-        $pageTitle = $scope === 'gst' ? 'GST Invoices' : 'All Invoices';
+        $isFreeInvoice = $kind === self::KIND_FREE;
+        $pageTitle = $isFreeInvoice
+            ? 'Free Invoice List'
+            : ($scope === 'gst' ? 'GST Invoices' : 'All Invoices');
         $customerId = request('customer_id');
         $status = request('status');
         $from = request('from');
@@ -53,7 +84,9 @@ class InvoiceController extends Controller
         $customers = Customer::orderBy('name')->get(['id', 'name', 'customer_code']);
 
         $invoices = Invoice::with('customer')
-            ->when($scope === 'gst', fn ($q) => $q->where('gst_type', '!=', 'none'))
+            ->when($kind === self::KIND_FREE, fn ($q) => $q->where('invoice_kind', self::KIND_FREE))
+            ->when($kind === self::KIND_STANDARD, fn ($q) => $q->where(fn ($in) => $in->where('invoice_kind', self::KIND_STANDARD)->orWhereNull('invoice_kind')))
+            ->when(!$isFreeInvoice && $scope === 'gst', fn ($q) => $q->where('gst_type', '!=', 'none'))
             ->when($customerId, fn ($q) => $q->where('customer_id', $customerId))
             ->when($status, fn ($q) => $q->where('status', $status))
             ->when($from, fn ($q) => $q->whereDate('invoice_date', '>=', $from))
@@ -62,10 +95,23 @@ class InvoiceController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        return view('pos.invoices-index', compact('scope', 'pageTitle', 'invoices', 'customers'));
+        $createRoute = $isFreeInvoice ? 'pos.invoices.free.create' : 'pos.invoices.create';
+        $listRoute = $isFreeInvoice ? 'pos.invoices.free.index' : 'pos.invoices.index';
+
+        return view('pos.invoices-index', compact('scope', 'pageTitle', 'invoices', 'customers', 'isFreeInvoice', 'createRoute', 'listRoute'));
     }
 
     public function store(Request $request): RedirectResponse
+    {
+        return $this->storeInvoice($request, self::KIND_STANDARD);
+    }
+
+    public function freeStore(Request $request): RedirectResponse
+    {
+        return $this->storeInvoice($request, self::KIND_FREE);
+    }
+
+    private function storeInvoice(Request $request, string $kind): RedirectResponse
     {
         $data = $request->validate([
             'prefix' => ['nullable', 'string', 'max:20'],
@@ -102,12 +148,13 @@ class InvoiceController extends Controller
             return back()->withErrors(['items_json' => 'Please provide valid item rows (minimum item amount is 1).'])->withInput();
         }
 
-        $invoice = DB::transaction(function () use ($data, $validItems) {
+        $invoice = DB::transaction(function () use ($data, $validItems, $kind) {
             $hasHsnItems = $validItems->contains(fn ($item) => $item['hsn_sac'] !== '');
             $gstType = $hasHsnItems && $data['gst_type'] === 'none' ? 'same' : $data['gst_type'];
 
             $invoice = Invoice::create([
                 'invoice_no' => $this->generateInvoiceNo(),
+                'invoice_kind' => $kind,
                 'prefix' => $data['prefix'] ?: null,
                 'customer_id' => $data['customer_id'] ?: null,
                 'invoice_date' => $data['invoice_date'],
@@ -126,7 +173,10 @@ class InvoiceController extends Controller
             return $invoice;
         });
 
-        return redirect()->route('pos.invoices.index')->with('success', "Invoice {$invoice->invoice_no} created successfully.");
+        $redirectRoute = $kind === self::KIND_FREE ? 'pos.invoices.free.index' : 'pos.invoices.index';
+        $invoiceLabel = $kind === self::KIND_FREE ? 'Free Invoice' : 'Invoice';
+
+        return redirect()->route($redirectRoute)->with('success', "{$invoiceLabel} {$invoice->invoice_no} created successfully.");
     }
 
     private function generateInvoiceNo(): string
@@ -207,14 +257,20 @@ class InvoiceController extends Controller
             $invoice->items()->createMany($validItems->all());
         });
 
-        return redirect()->route('pos.invoices.index')->with('success', 'Invoice updated successfully.');
+        $redirectRoute = $invoice->invoice_kind === self::KIND_FREE ? 'pos.invoices.free.index' : 'pos.invoices.index';
+        $invoiceLabel = $invoice->invoice_kind === self::KIND_FREE ? 'Free invoice' : 'Invoice';
+
+        return redirect()->route($redirectRoute)->with('success', $invoiceLabel . ' updated successfully.');
     }
 
     public function destroy(Invoice $invoice): RedirectResponse
     {
         $invoice->delete();
 
-        return redirect()->route('pos.invoices.index')->with('success', 'Invoice deleted successfully.');
+        $redirectRoute = $invoice->invoice_kind === self::KIND_FREE ? 'pos.invoices.free.index' : 'pos.invoices.index';
+        $invoiceLabel = $invoice->invoice_kind === self::KIND_FREE ? 'Free invoice' : 'Invoice';
+
+        return redirect()->route($redirectRoute)->with('success', $invoiceLabel . ' deleted successfully.');
     }
 
     public function convertGst(Invoice $invoice): RedirectResponse
