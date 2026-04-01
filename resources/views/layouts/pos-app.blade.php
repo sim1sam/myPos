@@ -12,6 +12,18 @@
     <body class="pos-app-bg min-h-screen font-sans text-slate-800 antialiased">
         @php
             $companyLogo = \App\Models\CompanyProfile::query()->value('logo_path');
+            $userPermissions = auth()->user()?->role?->permissions ?? [];
+            $hasFullAccess = !auth()->user()?->role;
+            $menuPermissionMap = [
+                'dashboard' => 'dashboard.view',
+                'pos.sales' => 'sales.create',
+                'pos.purchases' => 'purchases.view',
+                'pos.vendors' => 'vendors.view',
+                'pos.products' => 'invoices.dashboard',
+                'pos.customers' => 'customers.view',
+                'pos.payments.index' => 'payments.view',
+                'pos.settings' => 'settings.view',
+            ];
             $menu = [
                 ['label' => 'Home', 'route' => 'dashboard'],
                 ['label' => 'POS', 'route' => 'pos.sales'],
@@ -22,6 +34,13 @@
                 ['label' => 'Add Payment', 'route' => 'pos.payments.index'],
                 ['label' => 'Settings', 'route' => 'pos.settings'],
             ];
+            $menu = collect($menu)->filter(function ($item) use ($hasFullAccess, $userPermissions, $menuPermissionMap) {
+                if ($hasFullAccess) {
+                    return true;
+                }
+                $permission = $menuPermissionMap[$item['route']] ?? null;
+                return $permission ? in_array($permission, $userPermissions, true) : true;
+            })->values()->all();
         @endphp
 
         <div class="flex min-h-screen flex-col">

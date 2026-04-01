@@ -19,7 +19,7 @@ Route::middleware('guest')->group(function () {
     Route::post('login', [LoginController::class, 'store']);
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'role.access'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('sales', [InvoiceController::class, 'create'])->name('pos.sales');
     Route::get('purchases', [PurchaseController::class, 'dashboard'])->name('pos.purchases');
@@ -83,5 +83,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('settings/users/{user}', [SettingController::class, 'destroyUser'])->name('pos.settings.users.destroy');
     Route::get('settings/company-profile', [SettingController::class, 'companyProfile'])->name('pos.settings.company-profile');
     Route::post('settings/company-profile', [SettingController::class, 'updateCompanyProfile'])->name('pos.settings.company-profile.update');
+});
+
+Route::middleware('auth')->group(function () {
     Route::post('logout', [LoginController::class, 'destroy'])->name('logout');
 });

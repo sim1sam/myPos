@@ -17,16 +17,38 @@ use Illuminate\View\View;
 class SettingController extends Controller
 {
     private const ROLE_FUNCTION_OPTIONS = [
-        'dashboard' => 'Dashboard',
-        'pos' => 'POS',
-        'purchases' => 'Purchases',
-        'vendors' => 'Vendors',
-        'invoices' => 'Invoices',
-        'customers' => 'Customers',
-        'payments' => 'Payments',
-        'reports' => 'Reports',
-        'expenses' => 'Expenses',
-        'settings' => 'Settings',
+        'dashboard.view' => 'Dashboard View',
+        'sales.create' => 'POS Create Invoice',
+        'purchases.view' => 'Purchases Dashboard/List',
+        'purchases.create' => 'Purchases Create',
+        'purchases.edit' => 'Purchases Edit',
+        'purchases.delete' => 'Purchases Delete',
+        'vendors.view' => 'Vendors Dashboard/List',
+        'vendors.create' => 'Vendors Create',
+        'vendors.edit' => 'Vendors Edit',
+        'vendors.delete' => 'Vendors Delete',
+        'invoices.dashboard' => 'Invoices Dashboard',
+        'invoices.view' => 'Invoices List/View',
+        'invoices.create' => 'Invoices Create',
+        'invoices.edit' => 'Invoices Edit',
+        'invoices.delete' => 'Invoices Delete',
+        'customers.view' => 'Customers Dashboard/List/Summary',
+        'customers.create' => 'Customers Create',
+        'customers.edit' => 'Customers Edit',
+        'customers.delete' => 'Customers Delete',
+        'payments.view' => 'Payments List',
+        'payments.create' => 'Payments Create',
+        'reports.view' => 'Reports View',
+        'expenses.view' => 'Expenses Dashboard/List',
+        'expenses.create' => 'Expenses Create/Heads',
+        'expenses.edit' => 'Expenses Edit',
+        'expenses.delete' => 'Expenses Delete',
+        'settings.view' => 'Settings Dashboard',
+        'settings.gst_rates' => 'Settings GST Rates',
+        'settings.payment_modes' => 'Settings Payment Modes',
+        'settings.company_profile' => 'Settings Company Profile',
+        'settings.users' => 'Settings Users',
+        'settings.roles' => 'Settings Roles',
     ];
     private const COMPANY_PROFILE_DEFAULTS = [
         'company_name' => 'WISE DYNAMIC PRIVATE LIMITED',
@@ -295,7 +317,7 @@ class SettingController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:100', 'unique:roles,name'],
             'permissions' => ['nullable', 'array'],
-            'permissions.*' => ['string'],
+            'permissions.*' => ['string', 'in:' . implode(',', array_keys(self::ROLE_FUNCTION_OPTIONS))],
         ]);
 
         Role::create([
