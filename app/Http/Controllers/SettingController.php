@@ -50,6 +50,19 @@ class SettingController extends Controller
         'settings.users' => 'Settings Users',
         'settings.roles' => 'Settings Roles',
     ];
+
+    private const ROLE_PERMISSION_SECTIONS = [
+        'Dashboard' => ['dashboard.view'],
+        'Sales POS' => ['sales.create'],
+        'Purchases' => ['purchases.view', 'purchases.create', 'purchases.edit', 'purchases.delete'],
+        'Vendors' => ['vendors.view', 'vendors.create', 'vendors.edit', 'vendors.delete'],
+        'Invoices' => ['invoices.dashboard', 'invoices.view', 'invoices.create', 'invoices.edit', 'invoices.delete'],
+        'Customers' => ['customers.view', 'customers.create', 'customers.edit', 'customers.delete'],
+        'Payments' => ['payments.view', 'payments.create'],
+        'Reports' => ['reports.view'],
+        'Expenses' => ['expenses.view', 'expenses.create', 'expenses.edit', 'expenses.delete'],
+        'Settings' => ['settings.view', 'settings.gst_rates', 'settings.payment_modes', 'settings.company_profile', 'settings.users', 'settings.roles'],
+    ];
     private const COMPANY_PROFILE_DEFAULTS = [
         'company_name' => 'WISE DYNAMIC PRIVATE LIMITED',
         'company_email' => 'hello@wisedynamic.in',
@@ -309,6 +322,7 @@ class SettingController extends Controller
         return view('pos.roles', [
             'roles' => $roles,
             'functionOptions' => self::ROLE_FUNCTION_OPTIONS,
+            'permissionSections' => self::ROLE_PERMISSION_SECTIONS,
         ]);
     }
 

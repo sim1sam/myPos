@@ -26,12 +26,19 @@
                 </div>
                 <div>
                     <label class="pos-label">Function Select (User-wise)</label>
-                    <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                        @foreach ($functionOptions as $key => $label)
-                            <label class="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
-                                <input type="checkbox" name="permissions[]" value="{{ $key }}" class="h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500">
-                                <span>{{ $label }}</span>
-                            </label>
+                    <div class="space-y-4">
+                        @foreach ($permissionSections as $section => $keys)
+                            <div class="rounded-lg border border-sky-100 bg-sky-50/40 p-3">
+                                <h3 class="text-sm font-semibold text-sky-800">{{ $section }}</h3>
+                                <div class="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                                    @foreach ($keys as $key)
+                                        <label class="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
+                                            <input type="checkbox" name="permissions[]" value="{{ $key }}" class="h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500">
+                                            <span>{{ $functionOptions[$key] ?? $key }}</span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
                         @endforeach
                     </div>
                 </div>
