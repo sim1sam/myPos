@@ -239,11 +239,6 @@
                     descEl.innerHTML = filtered.length
                         ? filtered.map((p) => `<option value="${p.id}" data-rate="${p.rate}" data-unit="${p.unit || ''}">${p.name}</option>`).join('')
                         : `<option value="" disabled>No products available for selected HSN/SAC</option>`;
-
-                    // Keep flow simple: if products exist, preselect first one.
-                    if (filtered.length > 0 && descEl.options.length > 0) {
-                        descEl.options[0].selected = true;
-                    }
                     calcAmount();
                 };
 
@@ -278,9 +273,28 @@
                     calcAmount();
                 };
 
+                const onDescriptionDoubleClick = () => {
+                    if (isFreeInvoice || !descEl) {
+                        return;
+                    }
+                    // Double-click just confirms current multi-selection in same description row.
+                    calcAmount();
+                };
+
                 hsnEl.addEventListener('change', populateDescriptions);
                 if (descEl) {
+                    // Allow multi-select with normal click (no Ctrl/Cmd required).
+                    descEl.addEventListener('mousedown', (event) => {
+                        const target = event.target;
+                        if (!(target instanceof HTMLOptionElement)) {
+                            return;
+                        }
+                        event.preventDefault();
+                        target.selected = !target.selected;
+                        descEl.dispatchEvent(new Event('change', { bubbles: true }));
+                    });
                     descEl.addEventListener('change', onDescriptionChange);
+                    descEl.addEventListener('dblclick', onDescriptionDoubleClick);
                 }
                 if (descTextEl) {
                     descTextEl.addEventListener('input', onDescriptionChange);
@@ -322,28 +336,44 @@
             gstTypeEl.addEventListener('change', renderTotals);
             addRowBtn.addEventListener('click', addRow);
             formEl.addEventListener('submit', (e) => {
-                const items = [...tbody.querySelectorAll('tr')].map((row) => {
-                    const descriptionSelect = row.querySelector('.item-description');
-                    const selected = descriptionSelect ? descriptionSelect.selectedOptions[0] : null;
-                    return {
-                        description: isFreeInvoice
-                            ? (row.querySelector('.item-description-text')?.value || '').trim()
-                            : (selected ? selected.textContent.trim() : ''),
-                        hsn_sac: row.querySelector('.item-hsn').value || '',
-                        rate: Number(row.querySelector('.item-rate').value || 0),
-                        qty: Number(row.querySelector('.item-qty').value || 0),
-                        unit: row.querySelector('.item-unit').value || '',
-                        discount: Number(row.querySelector('.item-discount').value || 0),
-                        amount: Number(row.querySelector('.item-amount').value || 0),
-                    };
-                }).filter((item) => item.description && item.qty > 0 && item.amount >= 1);
+                const items = [];
 
-                if (!items.length) {
+                [...tbody.querySelectorAll('tr')].forEach((row) => {
+                    const hsnSac = row.querySelector('.item-hsn').value || '';
+                    const rate = Number(row.querySelector('.item-rate').value || 0);
+                    const qty = Number(row.querySelector('.item-qty').value || 0);
+                    const unit = row.querySelector('.item-unit').value || '';
+                    const discount = Number(row.querySelector('.item-discount').value || 0);
+                    const amount = Number(row.querySelector('.item-amount').value || 0);
+
+                    if (isFreeInvoice) {
+                        const description = (row.querySelector('.item-description-text')?.value || '').trim();
+                        items.push({ description, hsn_sac: hsnSac, rate, qty, unit, discount, amount });
+                        return;
+                    }
+
+                    const descriptionSelect = row.querySelector('.item-description');
+                    const selectedOptions = descriptionSelect ? [...descriptionSelect.selectedOptions] : [];
+                    const description = selectedOptions.map((opt) => (opt.textContent || '').trim()).filter(Boolean).join(', ');
+                    items.push({
+                        description,
+                        hsn_sac: hsnSac,
+                        rate,
+                        qty,
+                        unit,
+                        discount,
+                        amount,
+                    });
+                });
+
+                const validItems = items.filter((item) => item.description && item.qty > 0 && item.amount >= 1);
+
+                if (!validItems.length) {
                     e.preventDefault();
                     alert('Please add at least one item with minimum Amount 1.');
                     return;
                 }
-                itemsJsonEl.value = JSON.stringify(items);
+                itemsJsonEl.value = JSON.stringify(validItems);
             });
             addRow();
         })();
