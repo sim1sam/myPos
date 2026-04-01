@@ -74,7 +74,11 @@ Route::middleware('auth')->group(function () {
     Route::get('settings/payment-modes', [SettingController::class, 'paymentModes'])->name('pos.settings.payment-modes.index');
     Route::get('settings/payment-modes/create', [SettingController::class, 'createPaymentMode'])->name('pos.settings.payment-modes.create');
     Route::post('settings/payment-modes', [SettingController::class, 'storePaymentMode'])->name('pos.settings.payment-modes.store');
-    Route::view('settings/users', 'pos.page', ['title' => 'Users'])->name('pos.settings.users');
+    Route::get('settings/users', [SettingController::class, 'users'])->name('pos.settings.users');
+    Route::post('settings/users', [SettingController::class, 'storeUser'])->name('pos.settings.users.store');
+    Route::get('settings/users/{user}/edit', [SettingController::class, 'editUser'])->name('pos.settings.users.edit');
+    Route::put('settings/users/{user}', [SettingController::class, 'updateUser'])->name('pos.settings.users.update');
+    Route::delete('settings/users/{user}', [SettingController::class, 'destroyUser'])->name('pos.settings.users.destroy');
     Route::get('settings/company-profile', [SettingController::class, 'companyProfile'])->name('pos.settings.company-profile');
     Route::post('settings/company-profile', [SettingController::class, 'updateCompanyProfile'])->name('pos.settings.company-profile.update');
     Route::post('logout', [LoginController::class, 'destroy'])->name('logout');

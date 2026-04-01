@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\CompanyProfile;
 use App\Models\GstRate;
 use App\Models\PaymentMode;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -202,5 +204,60 @@ class SettingController extends Controller
         $profile->update($data);
 
         return redirect()->route('pos.settings.company-profile')->with('success', 'Company profile updated successfully.');
+    }
+
+    public function users(): View
+    {
+        $users = User::query()
+            ->latest()
+            ->paginate(15);
+
+        return view('pos.users', compact('users'));
+    }
+
+    public function storeUser(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:6'],
+        ]);
+
+        User::create($data);
+
+        return redirect()->route('pos.settings.users')->with('success', 'User created successfully.');
+    }
+
+    public function editUser(User $user): View
+    {
+        return view('pos.users-edit', compact('user'));
+    }
+
+    public function updateUser(Request $request, User $user): RedirectResponse
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'password' => ['nullable', 'string', 'min:6'],
+        ]);
+
+        if (empty($data['password'])) {
+            unset($data['password']);
+        }
+
+        $user->update($data);
+
+        return redirect()->route('pos.settings.users')->with('success', 'User updated successfully.');
+    }
+
+    public function destroyUser(User $user): RedirectResponse
+    {
+        if (Auth::id() === $user->id) {
+            return redirect()->route('pos.settings.users')->withErrors(['user' => 'You cannot delete your own account.']);
+        }
+
+        $user->delete();
+
+        return redirect()->route('pos.settings.users')->with('success', 'User deleted successfully.');
     }
 }
