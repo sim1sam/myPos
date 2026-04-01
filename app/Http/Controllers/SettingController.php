@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class SettingController extends Controller
@@ -62,6 +63,18 @@ class SettingController extends Controller
         'Reports' => ['reports.view'],
         'Expenses' => ['expenses.view', 'expenses.create', 'expenses.edit', 'expenses.delete'],
         'Settings' => ['settings.view', 'settings.gst_rates', 'settings.payment_modes', 'settings.company_profile', 'settings.users', 'settings.roles'],
+    ];
+    private const LEGACY_ROLE_PERMISSION_MAP = [
+        'dashboard' => ['dashboard.view'],
+        'pos' => ['sales.create'],
+        'purchases' => ['purchases.view', 'purchases.create', 'purchases.edit', 'purchases.delete'],
+        'vendors' => ['vendors.view', 'vendors.create', 'vendors.edit', 'vendors.delete'],
+        'invoices' => ['invoices.dashboard', 'invoices.view', 'invoices.create', 'invoices.edit', 'invoices.delete'],
+        'customers' => ['customers.view', 'customers.create', 'customers.edit', 'customers.delete'],
+        'payments' => ['payments.view', 'payments.create'],
+        'reports' => ['reports.view'],
+        'expenses' => ['expenses.view', 'expenses.create', 'expenses.edit', 'expenses.delete'],
+        'settings' => ['settings.view', 'settings.gst_rates', 'settings.payment_modes', 'settings.company_profile', 'settings.users', 'settings.roles'],
     ];
     private const COMPANY_PROFILE_DEFAULTS = [
         'company_name' => 'WISE DYNAMIC PRIVATE LIMITED',
@@ -318,6 +331,10 @@ class SettingController extends Controller
     public function roles(): View
     {
         $roles = Role::query()->orderBy('name')->paginate(15);
+        $roles->getCollection()->transform(function (Role $role) {
+            $role->permissions = $this->normalizeRolePermissions($role->permissions ?? []);
+            return $role;
+        });
 
         return view('pos.roles', [
             'roles' => $roles,
@@ -328,11 +345,7 @@ class SettingController extends Controller
 
     public function storeRole(Request $request): RedirectResponse
     {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:100', 'unique:roles,name'],
-            'permissions' => ['nullable', 'array'],
-            'permissions.*' => ['string', 'in:' . implode(',', array_keys(self::ROLE_FUNCTION_OPTIONS))],
-        ]);
+        $data = $this->validateRoleData($request);
 
         Role::create([
             'name' => $data['name'],
@@ -340,5 +353,71 @@ class SettingController extends Controller
         ]);
 
         return redirect()->route('pos.settings.roles')->with('success', 'Role created successfully.');
+    }
+
+    public function editRole(Role $role): View
+    {
+        $rolePermissions = $this->normalizeRolePermissions($role->permissions ?? []);
+
+        return view('pos.roles-edit', [
+            'role' => $role,
+            'rolePermissions' => $rolePermissions,
+            'functionOptions' => self::ROLE_FUNCTION_OPTIONS,
+            'permissionSections' => self::ROLE_PERMISSION_SECTIONS,
+        ]);
+    }
+
+    public function updateRole(Request $request, Role $role): RedirectResponse
+    {
+        $data = $this->validateRoleData($request, $role);
+
+        $role->update([
+            'name' => $data['name'],
+            'permissions' => array_values($data['permissions'] ?? []),
+        ]);
+
+        return redirect()->route('pos.settings.roles')->with('success', 'Role updated successfully.');
+    }
+
+    public function destroyRole(Role $role): RedirectResponse
+    {
+        if ($role->users()->exists()) {
+            return redirect()->route('pos.settings.roles')->withErrors([
+                'role' => 'Cannot delete this role because users are assigned to it.',
+            ]);
+        }
+
+        $role->delete();
+
+        return redirect()->route('pos.settings.roles')->with('success', 'Role deleted successfully.');
+    }
+
+    private function validateRoleData(Request $request, ?Role $role = null): array
+    {
+        return $request->validate([
+            'name' => [
+                'required',
+                'string',
+                'max:100',
+                Rule::unique('roles', 'name')->ignore($role?->id),
+            ],
+            'permissions' => ['nullable', 'array'],
+            'permissions.*' => ['string', 'in:' . implode(',', array_keys(self::ROLE_FUNCTION_OPTIONS))],
+        ]);
+    }
+
+    private function normalizeRolePermissions(array $permissions): array
+    {
+        $normalized = [];
+        foreach ($permissions as $permission) {
+            $permission = (string) $permission;
+            if (isset(self::LEGACY_ROLE_PERMISSION_MAP[$permission])) {
+                $normalized = array_merge($normalized, self::LEGACY_ROLE_PERMISSION_MAP[$permission]);
+                continue;
+            }
+            $normalized[] = $permission;
+        }
+
+        return array_values(array_unique($normalized));
     }
 }

@@ -24,6 +24,16 @@
                 'pos.payments.index' => 'payments.view',
                 'pos.settings' => 'settings.view',
             ];
+            $legacyMenuPermissionMap = [
+                'dashboard.view' => 'dashboard',
+                'sales.create' => 'pos',
+                'purchases.view' => 'purchases',
+                'vendors.view' => 'vendors',
+                'invoices.dashboard' => 'invoices',
+                'customers.view' => 'customers',
+                'payments.view' => 'payments',
+                'settings.view' => 'settings',
+            ];
             $menu = [
                 ['label' => 'Home', 'route' => 'dashboard'],
                 ['label' => 'POS', 'route' => 'pos.sales'],
@@ -34,12 +44,19 @@
                 ['label' => 'Add Payment', 'route' => 'pos.payments.index'],
                 ['label' => 'Settings', 'route' => 'pos.settings'],
             ];
-            $menu = collect($menu)->filter(function ($item) use ($hasFullAccess, $userPermissions, $menuPermissionMap) {
+            $menu = collect($menu)->filter(function ($item) use ($hasFullAccess, $userPermissions, $menuPermissionMap, $legacyMenuPermissionMap) {
                 if ($hasFullAccess) {
                     return true;
                 }
                 $permission = $menuPermissionMap[$item['route']] ?? null;
-                return $permission ? in_array($permission, $userPermissions, true) : true;
+                if (!$permission) {
+                    return true;
+                }
+                if (in_array($permission, $userPermissions, true)) {
+                    return true;
+                }
+                $legacyPermission = $legacyMenuPermissionMap[$permission] ?? null;
+                return $legacyPermission ? in_array($legacyPermission, $userPermissions, true) : false;
             })->values()->all();
         @endphp
 

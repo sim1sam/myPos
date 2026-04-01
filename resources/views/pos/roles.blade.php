@@ -4,6 +4,12 @@
 
 @section('page-content')
     <section>
+        @php
+            $selectedPermissions = collect(old('permissions', []))
+                ->map(fn ($permission) => (string) $permission)
+                ->values()
+                ->all();
+        @endphp
         <div class="flex items-end justify-between gap-4">
             <h1 class="text-3xl font-semibold tracking-tight text-slate-800">Role System</h1>
             <a href="{{ route('pos.settings') }}" class="pos-btn-ghost">Back</a>
@@ -12,6 +18,11 @@
         @if (session('success'))
             <div class="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
                 {{ session('success') }}
+            </div>
+        @endif
+        @if ($errors->has('role'))
+            <div class="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                {{ $errors->first('role') }}
             </div>
         @endif
 
@@ -33,7 +44,7 @@
                                 <div class="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                                     @foreach ($keys as $key)
                                         <label class="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
-                                            <input type="checkbox" name="permissions[]" value="{{ $key }}" class="h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500">
+                                            <input type="checkbox" name="permissions[]" value="{{ $key }}" class="h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500" @checked(in_array($key, $selectedPermissions, true))>
                                             <span>{{ $functionOptions[$key] ?? $key }}</span>
                                         </label>
                                     @endforeach
@@ -57,6 +68,7 @@
                             <th class="px-4 py-3 font-semibold">Role Name</th>
                             <th class="px-4 py-3 font-semibold">Functions</th>
                             <th class="px-4 py-3 font-semibold">Created On</th>
+                            <th class="px-4 py-3 font-semibold">Action</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200">
@@ -70,10 +82,20 @@
                                     {{ collect($role->permissions ?? [])->map(fn ($p) => $functionOptions[$p] ?? $p)->implode(', ') ?: '-' }}
                                 </td>
                                 <td class="px-4 py-3">{{ optional($role->created_at)->format('d-m-Y') }}</td>
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center gap-2">
+                                        <a href="{{ route('pos.settings.roles.edit', $role) }}" class="pos-btn-ghost py-1.5 text-xs">Edit</a>
+                                        <form method="POST" action="{{ route('pos.settings.roles.destroy', $role) }}" onsubmit="return confirm('Delete this role?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="rounded-md border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-medium text-rose-600 hover:bg-rose-100">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="px-4 py-8 text-center text-slate-500">No roles found.</td>
+                                <td colspan="5" class="px-4 py-8 text-center text-slate-500">No roles found.</td>
                             </tr>
                         @endforelse
                     </tbody>

@@ -76,6 +76,9 @@ Route::middleware(['auth', 'role.access'])->group(function () {
     Route::post('settings/payment-modes', [SettingController::class, 'storePaymentMode'])->name('pos.settings.payment-modes.store');
     Route::get('settings/roles', [SettingController::class, 'roles'])->name('pos.settings.roles');
     Route::post('settings/roles', [SettingController::class, 'storeRole'])->name('pos.settings.roles.store');
+    Route::get('settings/roles/{role}/edit', [SettingController::class, 'editRole'])->name('pos.settings.roles.edit');
+    Route::put('settings/roles/{role}', [SettingController::class, 'updateRole'])->name('pos.settings.roles.update');
+    Route::delete('settings/roles/{role}', [SettingController::class, 'destroyRole'])->name('pos.settings.roles.destroy');
     Route::get('settings/users', [SettingController::class, 'users'])->name('pos.settings.users');
     Route::post('settings/users', [SettingController::class, 'storeUser'])->name('pos.settings.users.store');
     Route::get('settings/users/{user}/edit', [SettingController::class, 'editUser'])->name('pos.settings.users.edit');
