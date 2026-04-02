@@ -23,7 +23,9 @@
                 <div class="relative z-10">
                     <div class="flex items-center gap-3">
                         @if ($companyLogo)
-                            <img src="{{ asset($companyLogo) }}" alt="Company Logo" class="h-12 w-auto object-contain">
+                            <span class="flex h-14 w-40 items-center justify-center overflow-hidden rounded-xl bg-white/95 px-3 ring-1 ring-white/70">
+                                <img src="{{ asset($companyLogo) }}" alt="Company Logo" class="h-10 w-full object-contain">
+                            </span>
                         @else
                             <span class="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-sky-500/15 ring-1 ring-sky-400/35">
                                 <svg class="h-7 w-7 text-sky-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
@@ -70,7 +72,9 @@
                     <header class="mb-10 text-center lg:hidden">
                         <div class="mx-auto mb-4 flex items-center justify-center">
                             @if ($companyLogo)
-                                <img src="{{ asset($companyLogo) }}" alt="Company Logo" class="h-14 w-auto object-contain">
+                                <span class="flex h-14 w-40 items-center justify-center overflow-hidden rounded-xl bg-white/95 px-3 ring-1 ring-white/70">
+                                    <img src="{{ asset($companyLogo) }}" alt="Company Logo" class="h-10 w-full object-contain">
+                                </span>
                             @else
                                 <div class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-sky-500/20 ring-1 ring-sky-400/40">
                                 <svg class="h-8 w-8 text-sky-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
