@@ -3,6 +3,9 @@
 @section('title', 'Sign in — ' . config('app.name'))
 
 @section('content')
+    @php
+        $companyLogo = \App\Models\CompanyProfile::query()->value('logo_path');
+    @endphp
     <div class="min-h-screen bg-slate-950">
         <div class="grid min-h-screen auto-rows-fr lg:grid-cols-[1fr_minmax(0,34rem)] xl:grid-cols-[1.05fr_minmax(0,38rem)]">
             {{-- Brand panel (desktop) --}}
@@ -19,15 +22,19 @@
 
                 <div class="relative z-10">
                     <div class="flex items-center gap-3">
-                        <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-500/15 ring-1 ring-sky-400/35">
-                            <svg class="h-7 w-7 text-sky-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3H15m7 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                            </svg>
-                        </span>
-                        <div>
-                            <p class="text-lg font-semibold tracking-tight text-white">{{ config('app.name') }}</p>
-                            <p class="text-sm text-sky-200/75">Retail · checkout · inventory</p>
-                        </div>
+                        @if ($companyLogo)
+                            <img src="{{ asset($companyLogo) }}" alt="Company Logo" class="h-12 w-auto object-contain">
+                        @else
+                            <span class="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-sky-500/15 ring-1 ring-sky-400/35">
+                                <svg class="h-7 w-7 text-sky-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3H15m7 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                </svg>
+                            </span>
+                            <div>
+                                <p class="text-lg font-semibold tracking-tight text-white">{{ config('app.name') }}</p>
+                                <p class="text-sm text-sky-200/75">Retail · checkout · inventory</p>
+                            </div>
+                        @endif
                     </div>
                     <h2 class="mt-14 max-w-md text-3xl font-semibold leading-tight tracking-tight text-white xl:text-4xl">
                         Fast checkout.<br />
@@ -61,10 +68,16 @@
                 <main class="relative z-10 mx-auto w-full max-w-lg lg:max-w-xl">
                     {{-- Mobile logo --}}
                     <header class="mb-10 text-center lg:hidden">
-                        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-sky-500/20 ring-1 ring-sky-400/40">
-                            <svg class="h-8 w-8 text-sky-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3H15m7 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                            </svg>
+                        <div class="mx-auto mb-4 flex items-center justify-center">
+                            @if ($companyLogo)
+                                <img src="{{ asset($companyLogo) }}" alt="Company Logo" class="h-14 w-auto object-contain">
+                            @else
+                                <div class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-sky-500/20 ring-1 ring-sky-400/40">
+                                <svg class="h-8 w-8 text-sky-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3H15m7 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                </svg>
+                                </div>
+                            @endif
                         </div>
                         <h1 class="text-xl font-semibold tracking-tight text-white">{{ config('app.name') }}</h1>
                         <p class="mt-1 text-sm text-sky-200/80">Sign in to your account</p>
