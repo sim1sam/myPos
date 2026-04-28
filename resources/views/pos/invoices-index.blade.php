@@ -6,9 +6,17 @@
     <section>
         <div class="flex items-end justify-between gap-4">
             <h1 class="text-3xl font-semibold tracking-tight text-slate-800">{{ $pageTitle }}</h1>
-            <a href="{{ route($createRoute ?? 'pos.invoices.create') }}" class="pos-btn-primary w-auto! px-5 py-2.5">
-                {{ ($isFreeInvoice ?? false) ? 'Create Free Invoice' : 'Create Invoice' }}
-            </a>
+            <div class="flex flex-wrap items-center gap-2">
+                <a
+                    href="{{ ($isFreeInvoice ?? false) ? route('pos.invoices.free.export-csv', request()->query()) : route('pos.invoices.export-csv', request()->query()) }}"
+                    class="pos-btn-ghost py-2.5"
+                >
+                    Download CSV
+                </a>
+                <a href="{{ route($createRoute ?? 'pos.invoices.create') }}" class="pos-btn-primary w-auto! px-5 py-2.5">
+                    {{ ($isFreeInvoice ?? false) ? 'Create Free Invoice' : 'Create Invoice' }}
+                </a>
+            </div>
         </div>
         @if (session('success'))
             <div class="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">

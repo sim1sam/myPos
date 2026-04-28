@@ -102,6 +102,9 @@
                class="pos-btn-ghost {{ $viewMode === 'list' ? 'bg-sky-50 text-sky-700 ring-1 ring-sky-100' : '' }}">
                 Detailed List
             </a>
+            <a href="{{ route('pos.reports.export-csv', request()->query()) }}" class="pos-btn-ghost">
+                Download CSV
+            </a>
             <a href="{{ route('pos.reports') }}" class="pos-btn-ghost">Reset</a>
             <button type="button" onclick="window.print()" class="pos-btn-primary w-auto! px-5 py-2">Print Report</button>
         </div>

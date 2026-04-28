@@ -7,10 +7,12 @@ use App\Models\CompanyProfile;
 use App\Models\GstRate;
 use App\Models\Invoice;
 use App\Models\Purchase;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class InvoiceController extends Controller
 {
@@ -70,6 +72,68 @@ class InvoiceController extends Controller
         return $this->invoiceListView(self::KIND_FREE);
     }
 
+    public function freeExportCsv(Request $request): StreamedResponse
+    {
+        return $this->exportInvoiceCsv($request, self::KIND_FREE, 'free-invoices');
+    }
+
+    public function exportCsv(Request $request): StreamedResponse
+    {
+        return $this->exportInvoiceCsv($request, self::KIND_STANDARD, 'invoices');
+    }
+
+    private function exportInvoiceCsv(Request $request, string $kind, string $prefix): StreamedResponse
+    {
+        $filters = [
+            'scope' => $request->query('scope', 'all'),
+            'customer_id' => $request->query('customer_id'),
+            'status' => $request->query('status'),
+            'from' => $request->query('from'),
+            'to' => $request->query('to'),
+        ];
+
+        $fileName = $prefix . '-' . now()->format('Ymd-His') . '.csv';
+        $invoices = $this->invoiceListQuery($kind, $filters)
+            ->latest()
+            ->get();
+
+        return response()->streamDownload(function () use ($invoices) {
+            $handle = fopen('php://output', 'w');
+
+            fputcsv($handle, [
+                'Invoice No',
+                'Customer',
+                'Invoice Date',
+                'Due Date',
+                'GST Type',
+                'Status',
+                'Subtotal',
+                'SGST',
+                'CGST',
+                'IGST',
+                'Total',
+            ]);
+
+            foreach ($invoices as $invoice) {
+                fputcsv($handle, [
+                    $invoice->invoice_no,
+                    $invoice->customer?->name ?: '-',
+                    optional($invoice->invoice_date)->format('Y-m-d'),
+                    optional($invoice->due_date)->format('Y-m-d'),
+                    strtoupper((string) $invoice->gst_type),
+                    strtoupper((string) $invoice->status),
+                    number_format((float) $invoice->subtotal, 2, '.', ''),
+                    number_format((float) $invoice->sgst, 2, '.', ''),
+                    number_format((float) $invoice->cgst, 2, '.', ''),
+                    number_format((float) $invoice->igst, 2, '.', ''),
+                    number_format((float) $invoice->total_amount, 2, '.', ''),
+                ]);
+            }
+
+            fclose($handle);
+        }, $fileName, ['Content-Type' => 'text/csv']);
+    }
+
     private function invoiceListView(string $kind): View
     {
         $scope = request('scope', 'all');
@@ -77,20 +141,16 @@ class InvoiceController extends Controller
         $pageTitle = $isFreeInvoice
             ? 'Free Invoice List'
             : ($scope === 'gst' ? 'GST Invoices' : 'All Invoices');
-        $customerId = request('customer_id');
-        $status = request('status');
-        $from = request('from');
-        $to = request('to');
+        $filters = [
+            'scope' => $scope,
+            'customer_id' => request('customer_id'),
+            'status' => request('status'),
+            'from' => request('from'),
+            'to' => request('to'),
+        ];
         $customers = Customer::orderBy('name')->get(['id', 'name', 'customer_code']);
 
-        $invoices = Invoice::with('customer')
-            ->when($kind === self::KIND_FREE, fn ($q) => $q->where('invoice_kind', self::KIND_FREE))
-            ->when($kind === self::KIND_STANDARD, fn ($q) => $q->where(fn ($in) => $in->where('invoice_kind', self::KIND_STANDARD)->orWhereNull('invoice_kind')))
-            ->when(!$isFreeInvoice && $scope === 'gst', fn ($q) => $q->where('gst_type', '!=', 'none'))
-            ->when($customerId, fn ($q) => $q->where('customer_id', $customerId))
-            ->when($status, fn ($q) => $q->where('status', $status))
-            ->when($from, fn ($q) => $q->whereDate('invoice_date', '>=', $from))
-            ->when($to, fn ($q) => $q->whereDate('invoice_date', '<=', $to))
+        $invoices = $this->invoiceListQuery($kind, $filters)
             ->latest()
             ->paginate(15)
             ->withQueryString();
@@ -99,6 +159,25 @@ class InvoiceController extends Controller
         $listRoute = $isFreeInvoice ? 'pos.invoices.free.index' : 'pos.invoices.index';
 
         return view('pos.invoices-index', compact('scope', 'pageTitle', 'invoices', 'customers', 'isFreeInvoice', 'createRoute', 'listRoute'));
+    }
+
+    private function invoiceListQuery(string $kind, array $filters): Builder
+    {
+        $scope = $filters['scope'] ?? 'all';
+        $isFreeInvoice = $kind === self::KIND_FREE;
+        $customerId = $filters['customer_id'] ?? null;
+        $status = $filters['status'] ?? null;
+        $from = $filters['from'] ?? null;
+        $to = $filters['to'] ?? null;
+
+        return Invoice::with('customer')
+            ->when($kind === self::KIND_FREE, fn ($q) => $q->where('invoice_kind', self::KIND_FREE))
+            ->when($kind === self::KIND_STANDARD, fn ($q) => $q->where(fn ($in) => $in->where('invoice_kind', self::KIND_STANDARD)->orWhereNull('invoice_kind')))
+            ->when(!$isFreeInvoice && $scope === 'gst', fn ($q) => $q->where('gst_type', '!=', 'none'))
+            ->when($customerId, fn ($q) => $q->where('customer_id', $customerId))
+            ->when($status, fn ($q) => $q->where('status', $status))
+            ->when($from, fn ($q) => $q->whereDate('invoice_date', '>=', $from))
+            ->when($to, fn ($q) => $q->whereDate('invoice_date', '<=', $to));
     }
 
     public function store(Request $request): RedirectResponse
