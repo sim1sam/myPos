@@ -126,4 +126,47 @@
         border-color: #2563eb;
         color: #ffffff;
     }
+
+    .terminal-cmd-btn {
+        @apply flex w-full items-center gap-4 rounded-xl border p-4 text-left shadow-sm transition;
+        @apply hover:-translate-y-0.5 hover:shadow-md;
+        @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
+        @apply disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-sm;
+    }
+
+    .terminal-cmd-icon {
+        @apply inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg;
+    }
+
+    .terminal-cmd-title {
+        @apply block text-sm font-semibold;
+    }
+
+    .terminal-cmd-desc {
+        @apply mt-0.5 block text-xs leading-5 opacity-80;
+    }
+
+    .terminal-cmd-migrate {
+        @apply border-sky-200 bg-sky-50 text-sky-900 hover:border-sky-300 hover:bg-sky-100 focus-visible:ring-sky-400;
+    }
+
+    .terminal-cmd-migrate .terminal-cmd-icon {
+        @apply bg-sky-600 text-white shadow-sm shadow-sky-300/60;
+    }
+
+    .terminal-cmd-cache {
+        @apply border-violet-200 bg-violet-50 text-violet-900 hover:border-violet-300 hover:bg-violet-100 focus-visible:ring-violet-400;
+    }
+
+    .terminal-cmd-cache .terminal-cmd-icon {
+        @apply bg-violet-600 text-white shadow-sm shadow-violet-300/60;
+    }
+
+    .terminal-cmd-deploy {
+        @apply border-emerald-200 bg-emerald-50 text-emerald-900 hover:border-emerald-300 hover:bg-emerald-100 focus-visible:ring-emerald-400;
+    }
+
+    .terminal-cmd-deploy .terminal-cmd-icon {
+        @apply bg-emerald-600 text-white shadow-sm shadow-emerald-300/60;
+    }
 }

@@ -8,6 +8,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\StockController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
@@ -61,6 +62,12 @@ Route::middleware(['auth', 'role.access'])->group(function () {
     Route::put('customers/{customer}', [CustomerController::class, 'update'])->name('pos.customers.update');
     Route::delete('customers/{customer}', [CustomerController::class, 'destroy'])->name('pos.customers.destroy');
     Route::get('inventory', [PaymentController::class, 'create'])->name('pos.inventory');
+    Route::get('stock', [StockController::class, 'dashboard'])->name('pos.stock');
+    Route::get('stock/list', [StockController::class, 'index'])->name('pos.stock.index');
+    Route::get('stock/opening/create', [StockController::class, 'createOpeningStock'])->name('pos.stock.opening.create');
+    Route::post('stock/opening', [StockController::class, 'storeOpeningStock'])->name('pos.stock.opening.store');
+    Route::get('stock/damage/create', [StockController::class, 'createDamageEntry'])->name('pos.stock.damage.create');
+    Route::post('stock/damage', [StockController::class, 'storeDamageEntry'])->name('pos.stock.damage.store');
     Route::get('payments/list', [PaymentController::class, 'index'])->name('pos.payments.index');
     Route::post('payments', [PaymentController::class, 'store'])->name('pos.payments.store');
     Route::get('reports', [ReportController::class, 'index'])->name('pos.reports');
@@ -92,6 +99,8 @@ Route::middleware(['auth', 'role.access'])->group(function () {
     Route::delete('settings/users/{user}', [SettingController::class, 'destroyUser'])->name('pos.settings.users.destroy');
     Route::get('settings/company-profile', [SettingController::class, 'companyProfile'])->name('pos.settings.company-profile');
     Route::post('settings/company-profile', [SettingController::class, 'updateCompanyProfile'])->name('pos.settings.company-profile.update');
+    Route::get('settings/terminal', [SettingController::class, 'terminal'])->name('pos.settings.terminal');
+    Route::post('settings/terminal/run', [SettingController::class, 'runTerminalCommand'])->name('pos.settings.terminal.run');
 });
 
 Route::middleware('auth')->group(function () {

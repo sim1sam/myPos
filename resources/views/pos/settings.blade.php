@@ -61,6 +61,16 @@
                 <h2 class="mt-2 text-xl font-semibold text-slate-800">Company Profile</h2>
                 <p class="mt-2 text-sm text-slate-500">Manage your company profile and info.</p>
             </a>
+
+            <a href="{{ route('pos.settings.terminal') }}" class="pos-dashboard-card group">
+                <span class="pos-card-icon">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m6.75 7.5 3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 17.25V6.75A2.25 2.25 0 0 0 18.75 4.5H5.25A2.25 2.25 0 0 0 3 6.75v10.5A2.25 2.25 0 0 0 5.25 19.5Z"/>
+                    </svg>
+                </span>
+                <h2 class="mt-2 text-xl font-semibold text-slate-800">Terminal</h2>
+                <p class="mt-2 text-sm text-slate-500">Run deployment commands on the live server.</p>
+            </a>
         </div>
     </section>
 @endsection

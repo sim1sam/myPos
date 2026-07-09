@@ -35,12 +35,16 @@ class RolePermissionMiddleware
         'expenses.create' => 'expenses',
         'expenses.edit' => 'expenses',
         'expenses.delete' => 'expenses',
+        'stock.view' => 'stock',
+        'stock.opening' => 'stock',
+        'stock.damage' => 'stock',
         'settings.view' => 'settings',
         'settings.gst_rates' => 'settings',
         'settings.payment_modes' => 'settings',
         'settings.company_profile' => 'settings',
         'settings.users' => 'settings',
         'settings.roles' => 'settings',
+        'settings.terminal' => 'settings',
     ];
 
     private const ROUTE_PERMISSION_MAP = [
@@ -94,6 +98,12 @@ class RolePermissionMiddleware
         'pos.expenses.edit' => 'expenses.edit',
         'pos.expenses.update' => 'expenses.edit',
         'pos.expenses.destroy' => 'expenses.delete',
+        'pos.stock' => 'stock.view',
+        'pos.stock.index' => 'stock.view',
+        'pos.stock.opening.create' => 'stock.opening',
+        'pos.stock.opening.store' => 'stock.opening',
+        'pos.stock.damage.create' => 'stock.damage',
+        'pos.stock.damage.store' => 'stock.damage',
         'pos.settings' => 'settings.view',
         'pos.settings.gst-rates' => 'settings.gst_rates',
         'pos.settings.gst-rates.store' => 'settings.gst_rates',
@@ -112,6 +122,8 @@ class RolePermissionMiddleware
         'pos.settings.roles.edit' => 'settings.roles',
         'pos.settings.roles.update' => 'settings.roles',
         'pos.settings.roles.destroy' => 'settings.roles',
+        'pos.settings.terminal' => 'settings.terminal',
+        'pos.settings.terminal.run' => 'settings.terminal',
     ];
 
     public function handle(Request $request, Closure $next): Response

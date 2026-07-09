@@ -88,8 +88,8 @@
                     </header>
 
                     <header class="mb-10 hidden lg:block lg:mb-12">
-                        <h1 class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white xl:text-3xl">Welcome back</h1>
-                        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400 lg:text-base">Enter your credentials to open the register.</p>
+                        <h1 class="text-2xl font-semibold tracking-tight text-white xl:text-3xl">Welcome back</h1>
+                        <p class="mt-2 text-sm text-sky-200/80 lg:text-base">Enter your credentials to open the register.</p>
                     </header>
 
                     <section class="pos-surface p-8 sm:p-10 lg:p-11 xl:p-12" aria-labelledby="login-heading">

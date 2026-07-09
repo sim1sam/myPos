@@ -1,6 +1,6 @@
-# myPos
+# GST POS
 
-Laravel POS app with Tailwind login UI.
+GST POS — Laravel point-of-sale app with Tailwind UI.
 
 ## Local setup
 

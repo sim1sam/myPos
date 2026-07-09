@@ -7,6 +7,7 @@ use App\Models\Purchase;
 use App\Models\Vendor;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class PurchaseController extends Controller
@@ -34,19 +35,51 @@ class PurchaseController extends Controller
             'vendor_id' => ['required', 'exists:vendors,id'],
             'invoice_no' => ['required', 'string', 'max:255'],
             'invoice_date' => ['required', 'date'],
-            'product_name' => ['required', 'string', 'max:255'],
-            'hsn_sac' => ['nullable', 'string', 'max:50'],
-            'price' => ['required', 'numeric', 'min:0'],
-            'qty' => ['required', 'integer', 'min:1'],
+            'items_json' => ['required', 'string'],
         ]);
 
+        $items = json_decode($data['items_json'], true);
+        if (! is_array($items) || count($items) === 0) {
+            return back()->withErrors(['items_json' => 'Please add at least one purchase item.'])->withInput();
+        }
+
+        $validItems = collect($items)->map(function ($item) {
+            return [
+                'product_name' => trim((string) ($item['product_name'] ?? '')),
+                'hsn_sac' => trim((string) ($item['hsn_sac'] ?? '')) ?: null,
+                'price' => (float) ($item['price'] ?? 0),
+                'qty' => (int) ($item['qty'] ?? 0),
+            ];
+        })->filter(fn ($item) => $item['product_name'] !== '' && $item['qty'] >= 1 && $item['price'] >= 0)->values();
+
+        if ($validItems->isEmpty()) {
+            return back()->withErrors(['items_json' => 'Please provide valid item rows with product name, price, and quantity.'])->withInput();
+        }
+
         $vendor = Vendor::findOrFail($data['vendor_id']);
-        $data['vendor_name'] = $vendor->name;
-        $data['total_amount'] = (float) $data['price'] * (int) $data['qty'];
 
-        Purchase::create($data);
+        DB::transaction(function () use ($data, $validItems, $vendor) {
+            foreach ($validItems as $item) {
+                Purchase::create([
+                    'vendor_id' => $data['vendor_id'],
+                    'vendor_name' => $vendor->name,
+                    'invoice_no' => $data['invoice_no'],
+                    'invoice_date' => $data['invoice_date'],
+                    'product_name' => $item['product_name'],
+                    'hsn_sac' => $item['hsn_sac'],
+                    'price' => $item['price'],
+                    'qty' => $item['qty'],
+                    'total_amount' => $item['price'] * $item['qty'],
+                ]);
+            }
+        });
 
-        return redirect()->route('pos.purchases.create')->with('success', 'Purchase created successfully.');
+        $count = $validItems->count();
+        $message = $count === 1
+            ? 'Purchase created successfully.'
+            : "{$count} purchase items created successfully.";
+
+        return redirect()->route('pos.purchases.create')->with('success', $message);
     }
 
     public function index(): View

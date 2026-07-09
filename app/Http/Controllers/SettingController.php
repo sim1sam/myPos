@@ -7,8 +7,10 @@ use App\Models\GstRate;
 use App\Models\PaymentMode;
 use App\Models\Role;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
@@ -44,12 +46,16 @@ class SettingController extends Controller
         'expenses.create' => 'Expenses Create/Heads',
         'expenses.edit' => 'Expenses Edit',
         'expenses.delete' => 'Expenses Delete',
+        'stock.view' => 'Inventory Dashboard/List',
+        'stock.opening' => 'Inventory Opening Stock',
+        'stock.damage' => 'Inventory Damage Entry',
         'settings.view' => 'Settings Dashboard',
         'settings.gst_rates' => 'Settings GST Rates',
         'settings.payment_modes' => 'Settings Payment Modes',
         'settings.company_profile' => 'Settings Company Profile',
         'settings.users' => 'Settings Users',
         'settings.roles' => 'Settings Roles',
+        'settings.terminal' => 'Settings Terminal',
     ];
 
     private const ROLE_PERMISSION_SECTIONS = [
@@ -62,7 +68,8 @@ class SettingController extends Controller
         'Payments' => ['payments.view', 'payments.create'],
         'Reports' => ['reports.view'],
         'Expenses' => ['expenses.view', 'expenses.create', 'expenses.edit', 'expenses.delete'],
-        'Settings' => ['settings.view', 'settings.gst_rates', 'settings.payment_modes', 'settings.company_profile', 'settings.users', 'settings.roles'],
+        'Inventory' => ['stock.view', 'stock.opening', 'stock.damage'],
+        'Settings' => ['settings.view', 'settings.gst_rates', 'settings.payment_modes', 'settings.company_profile', 'settings.users', 'settings.roles', 'settings.terminal'],
     ];
     private const LEGACY_ROLE_PERMISSION_MAP = [
         'dashboard' => ['dashboard.view'],
@@ -74,7 +81,8 @@ class SettingController extends Controller
         'payments' => ['payments.view', 'payments.create'],
         'reports' => ['reports.view'],
         'expenses' => ['expenses.view', 'expenses.create', 'expenses.edit', 'expenses.delete'],
-        'settings' => ['settings.view', 'settings.gst_rates', 'settings.payment_modes', 'settings.company_profile', 'settings.users', 'settings.roles'],
+        'stock' => ['stock.view', 'stock.opening', 'stock.damage'],
+        'settings' => ['settings.view', 'settings.gst_rates', 'settings.payment_modes', 'settings.company_profile', 'settings.users', 'settings.roles', 'settings.terminal'],
     ];
     private const COMPANY_PROFILE_DEFAULTS = [
         'company_name' => 'WISE DYNAMIC PRIVATE LIMITED',
@@ -98,6 +106,87 @@ class SettingController extends Controller
     public function index(): View
     {
         return view('pos.settings');
+    }
+
+    public function terminal(): View
+    {
+        return view('pos.settings-terminal');
+    }
+
+    public function runTerminalCommand(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'action' => ['required', 'string', Rule::in(['migrate', 'clear-cache', 'post-deployment'])],
+        ]);
+
+        $lines = [];
+        $exitCode = 0;
+
+        try {
+            switch ($data['action']) {
+                case 'migrate':
+                    $exitCode = Artisan::call('migrate', ['--force' => true]);
+                    $lines[] = $this->terminalCommandLabel('migrate', ['--force' => true]);
+                    $lines[] = Artisan::output();
+                    break;
+
+                case 'clear-cache':
+                    $exitCode = Artisan::call('optimize:clear');
+                    $lines[] = $this->terminalCommandLabel('optimize:clear');
+                    $lines[] = Artisan::output();
+                    break;
+
+                case 'post-deployment':
+                    $hotPath = public_path('hot');
+                    if (File::exists($hotPath)) {
+                        File::delete($hotPath);
+                        $lines[] = 'Removed stale Vite hot file (public/hot).';
+                    }
+
+                    foreach (['optimize:clear', 'config:cache', 'route:cache', 'view:cache'] as $command) {
+                        $code = Artisan::call($command);
+                        $lines[] = $this->terminalCommandLabel($command);
+                        $lines[] = Artisan::output();
+                        if ($code !== 0) {
+                            $exitCode = $code;
+                        }
+                    }
+
+                    $code = Artisan::call('storage:link');
+                    $lines[] = $this->terminalCommandLabel('storage:link');
+                    $lines[] = Artisan::output();
+                    if ($code !== 0) {
+                        $exitCode = $code;
+                    }
+                    break;
+            }
+        } catch (\Throwable $exception) {
+            return response()->json([
+                'ok' => false,
+                'action' => $data['action'],
+                'output' => trim(implode("\n", $lines)) . "\n\nERROR: " . $exception->getMessage(),
+            ], 500);
+        }
+
+        $output = trim(implode("\n", array_filter($lines, static fn ($line) => $line !== '' && $line !== null)));
+
+        return response()->json([
+            'ok' => $exitCode === 0,
+            'action' => $data['action'],
+            'output' => $output !== '' ? $output : 'Command completed with no output.',
+        ], $exitCode === 0 ? 200 : 500);
+    }
+
+    private function terminalCommandLabel(string $command, array $parameters = []): string
+    {
+        $suffix = collect($parameters)
+            ->map(static fn ($value, $key) => is_bool($value)
+                ? ($value ? $key : '')
+                : (is_string($key) ? "{$key}={$value}" : (string) $value))
+            ->filter()
+            ->implode(' ');
+
+        return '>>> php artisan ' . $command . ($suffix !== '' ? ' ' . $suffix : '');
     }
 
     public function gstRates(): View
